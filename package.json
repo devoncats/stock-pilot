@@ -1,0 +1,13 @@
+{
+  "name": "stock-pilot",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "packageManager": "pnpm@11.14.0",
+  "engines": { "node": ">=24" },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "@biomejs/biome", "@swc/core", "sharp"]
+  }
+}
