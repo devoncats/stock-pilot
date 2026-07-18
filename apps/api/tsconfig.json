@@ -1,0 +1,14 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "outDir": "./dist",
+        "sourceMap": true,
+        "incremental": true,
+    },
+    "include": ["src/**/*", "test/**/*"],
+}
