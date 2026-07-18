@@ -1,0 +1,14 @@
+{
+    "recommendations": [
+        "biomejs.biome",
+        "editorconfig.editorconfig",
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "ms-azuretools.vscode-docker",
+        "prisma.prisma"
+    ],
+    "unwantedRecommendations": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint"
+    ]
+}

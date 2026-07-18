@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "target": "es2023",
+        "moduleResolution": "bundler",
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+    },
+}
