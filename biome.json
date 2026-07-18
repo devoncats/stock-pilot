@@ -45,6 +45,16 @@
                     "trailingCommas": "all"
                 }
             }
+        },
+        {
+            "includes": ["apps/api/**"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "useImportType": "off"
+                    }
+                }
+            }
         }
     ]
 }
