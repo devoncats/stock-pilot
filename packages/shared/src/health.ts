@@ -1,5 +1,10 @@
 export type HealthStatus = { status: "ok" };
 
 export function isHealthStatus(value: unknown): value is HealthStatus {
-    return false;
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "status" in value &&
+        value.status === "ok"
+    );
 }
