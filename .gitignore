@@ -10,7 +10,6 @@ out/
 
 # ─── Next.js (apps/web) ────────────────────────────────────────
 .next/
-next-env.d.ts
 
 # ─── Testing / coverage ────────────────────────────────────────
 coverage/
