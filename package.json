@@ -5,12 +5,13 @@
   "scripts": {
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
-    "check": "pnpm typecheck && pnpm lint && pnpm format:check",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm lint:ml",
     "lint": "biome lint .",
+    "lint:ml": "uv run --directory services/machine-learning ruff check .",
     "format": "biome format . --write",
     "format:check": "biome format .",
     "test": "pnpm -r test && pnpm test:ml",
-    "test:ml": "uv run --directory services/ml pytest",
+    "test:ml": "uv run --directory services/machine-learning pytest",
     "dev": "pnpm --parallel --filter \"./apps/*\" dev",
     "prepare": "husky"
   },

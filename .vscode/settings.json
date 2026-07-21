@@ -26,5 +26,7 @@
         "**/.next": true,
         "**/.venv": true,
         "**/pnpm-lock.yaml": true
-    }
+    },
+    "python.defaultInterpreterPath": "./services/machine-learning/.venv/Scripts/python.exe",
+    "python.analysis.extraPaths": ["./services/machine-learning/src"]
 }
