@@ -2,12 +2,13 @@
   "name": "@stock-pilot/api",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/main.js",
     "dev": "nest start --watch",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
