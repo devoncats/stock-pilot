@@ -14,7 +14,7 @@ deployables that share PostgreSQL as the source of truth.
 | Node | 24 | see `.nvmrc` |
 | pnpm | 10+ | `corepack enable` |
 | uv | 0.11+ | Python toolchain for `services/machine-learning` |
-| Docker | latest | required from F0-02 onwards |
+| Docker | latest | required for the local stack (Postgres, Redis) |
 
 ## Layout
 
@@ -34,11 +34,12 @@ repository for the full architecture rules.
 
 ```bash
 pnpm install
-pnpm check
-pnpm test
-pnpm dev
+cp .env.example .env
+pnpm compose:up      # Postgres and Redis
+pnpm dev             # api and web on the host
 ```
 
+The example environment works as-is for local development — nothing to fill in.
 `pnpm dev` starts the web app on <http://localhost:3000> and the API on
 <http://localhost:8080>. Verify the API with:
 
@@ -46,6 +47,47 @@ pnpm dev
 curl http://localhost:8080/health
 # {"status":"ok"}
 ```
+
+## Local stack
+
+Two ways to run it, and they are not interchangeable.
+
+**Daily development — the recommended path.** `pnpm compose:up` starts only the
+backing services; `pnpm dev` runs `api` and `web` on the host with hot reload.
+This is deliberately the default on Windows: bind-mounting a pnpm workspace into
+a Linux container makes the symlinked `node_modules` slow and fragile, and
+filesystem events do not propagate, so watch mode in a container does not work.
+
+**Everything in containers.** `pnpm compose:up:apps` builds and starts all four
+services. Use it to check parity with a deployed build, or to run the project on
+a machine without the Node and Python toolchains. These are **production
+images** — they compile at image build time and run the compiled artefact, so a
+source change needs a rebuild. `compose:up:apps` passes `--build`, so the command
+is the same; it just takes about a minute.
+
+| Service | URL | Configurable via |
+| --- | --- | --- |
+| web | <http://localhost:3000> | `WEB_PORT` |
+| api | <http://localhost:8080> | `API_PORT` |
+| Postgres | `localhost:5432` | `POSTGRES_PORT` |
+| Redis | `localhost:6379` | `REDIS_PORT` |
+
+Only the host ports are configurable. Inside the Compose network the ports are
+constants, so both startup paths always agree on where the API lives.
+
+Verify the stack with the smoke script:
+
+```bash
+pnpm smoke:infrastructure   # Postgres answers SELECT 1, Redis answers PING
+pnpm smoke:apps             # the above, plus api /health and the web root
+```
+
+> **`docker compose down` is not enough.** `api` and `web` sit under the `apps`
+> profile, and a profile-less `down` ignores them — they keep running. Use
+> `pnpm compose:down`, which pins `--profile apps`.
+
+> **Never run `docker compose down -v`.** The `-v` removes the `pgdata` volume,
+> which is the database.
 
 ## Scripts
 
@@ -57,6 +99,13 @@ curl http://localhost:8080/health
 | `pnpm dev` | Runs `api` and `web` in parallel |
 | `pnpm format` | Formats the repository with Biome |
 | `pnpm typecheck` | `tsc --noEmit` in every TS workspace |
+| `pnpm compose:up` | Starts Postgres and Redis only — the daily path |
+| `pnpm compose:up:apps` | Builds and starts all four services |
+| `pnpm compose:down` | Stops everything, including the `apps` profile |
+| `pnpm compose:logs` | Tails logs for every service |
+| `pnpm compose:config` | Validates the Compose file |
+| `pnpm smoke:infrastructure` | Checks Postgres and Redis are answering |
+| `pnpm smoke:apps` | Same, plus the API `/health` and the web root |
 
 `pnpm check` is the single quality gate — CI calls it rather than re-listing the
 individual commands, so local and CI cannot drift.
@@ -92,3 +141,20 @@ dependency injection. Anything Nest instantiates or injects must be a plain
 
 `apps/api` also runs Vitest through SWC (`unplugin-swc`) with `oxc: false`, because
 neither Oxc nor esbuild emits the decorator metadata Nest depends on.
+
+The two app images have deliberately different shapes, each following its own
+framework's official guidance. `apps/api` is a single stage running
+`node apps/api/dist/main`, as in the NestJS deployment docs. `apps/web` is three
+stages using Next's `output: "standalone"` and a non-root user, as in the Vercel
+`with-docker` example. Because `outputFileTracingRoot` points at the repo root,
+the standalone tree mirrors the monorepo and the server ends up at
+`apps/web/server.js`, not at the standalone root — and `.next/static` and `public`
+are copied explicitly, since the minimal server does not include them.
+
+`NEXT_PUBLIC_API_URL` is a **build argument**, not a runtime variable. Next inlines
+`NEXT_PUBLIC_*` into the browser bundle at compile time, so setting it in
+`environment:` would have no effect.
+
+Every Compose invocation passes `--env-file .env`. The Compose project directory
+is `infrastructure/`, where no `.env` exists, so without the flag every `${VAR}`
+resolves to empty — silently.
