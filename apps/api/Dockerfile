@@ -23,4 +23,4 @@ ENV NODE_ENV=production
 
 EXPOSE 8080
 
-CMD ["node", "apps/api/dist/main"]
+CMD ["node", "apps/api/dist/main.js"]
