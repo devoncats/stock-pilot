@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 
-const COMPOSE_FILE = "infrastructure/docker-compose.yml";
+const COMPOSE_FILE = "infrastructure/docker-compose.yaml";
 const HTTP_TIMEOUT_MS = 5_000;
 
 type Check = {
