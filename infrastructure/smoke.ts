@@ -14,7 +14,7 @@ try {
     // No .env yet — fall back to the documented defaults.
 }
 
-const apiPort = process.env.API_PORT ?? "3001";
+const apiPort = process.env.API_PORT ?? "8080";
 const webPort = process.env.WEB_PORT ?? "3000";
 const withApps = process.argv.includes("--apps");
 

@@ -40,10 +40,10 @@ pnpm dev
 ```
 
 `pnpm dev` starts the web app on <http://localhost:3000> and the API on
-<http://localhost:3001>. Verify the API with:
+<http://localhost:8080>. Verify the API with:
 
 ```bash
-curl http://localhost:3001/health
+curl http://localhost:8080/health
 # {"status":"ok"}
 ```
 
