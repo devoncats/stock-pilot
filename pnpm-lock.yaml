@@ -53,9 +53,6 @@ importers:
       '@stock-pilot/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
       pg:
         specifier: ^8.22.0
         version: 8.22.0
@@ -93,6 +90,9 @@ importers:
       '@types/supertest':
         specifier: ^7.0.0
         version: 7.2.1
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       prisma:
         specifier: ^7.9.0
         version: 7.9.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
