@@ -3,11 +3,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
     oxc: false,
-    test: {
-        globals: false,
-        environment: "node",
-        include: ["test/**/*.e2e-spec.ts", "test/**/*.spec.ts"],
-    },
+    resolve: { tsconfigPaths: true },
     plugins: [
         swc.vite({
             module: { type: "es6" },
@@ -23,4 +19,35 @@ export default defineConfig({
             },
         }),
     ],
+    test: {
+        projects: [
+            {
+                extends: true,
+                test: {
+                    name: "unit",
+                    environment: "node",
+                    include: ["src/**/*.spec.ts"],
+                },
+            },
+            {
+                extends: true,
+                test: {
+                    name: "integration",
+                    environment: "node",
+                    include: ["test/**/*.int-spec.ts"],
+                    globalSetup: ["./test/integration/support/global-setup.ts"],
+                    setupFiles: ["./test/integration/support/env.ts"],
+                    fileParallelism: false,
+                },
+            },
+            {
+                extends: true,
+                test: {
+                    name: "e2e",
+                    environment: "node",
+                    include: ["test/**/*.e2e-spec.ts"],
+                },
+            },
+        ],
+    },
 });

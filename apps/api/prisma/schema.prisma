@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+    provider            = "prisma-client"
+    output              = "../src/generated/prisma"
+    runtime             = "nodejs"
+    moduleFormat        = "esm"
+    importFileExtension = "js"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+enum MovementType {
+    RECEIPT
+    SHIPMENT
+    ADJUSTMENT
+
+    @@map("movement_type")
+}
+
+enum ReferenceType {
+    PURCHASE_ORDER
+    CUSTOMER_ORDER
+    MANUAL
+
+    @@map("reference_type")
+}
+
+model Product {
+    id              String   @id @db.Uuid
+    sku             String   @unique
+    name            String
+    category        String
+    unitCost        Decimal  @map("unit_cost") @db.Decimal(12, 2)
+    price           Decimal? @db.Decimal(12, 2)
+    holdingCostRate Decimal  @map("holding_cost_rate") @db.Decimal(5, 4)
+    active          Boolean  @default(true)
+    createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+    updatedAt       DateTime @default(now()) @map("updated_at") @db.Timestamptz
+
+    supplierProducts SupplierProduct[]
+    inventoryItems   InventoryItem[]
+    stockMovements   StockMovement[]
+
+    @@map("products")
+}
+
+model Supplier {
+    id           String   @id @db.Uuid
+    name         String
+    orderingCost Decimal  @map("ordering_cost") @db.Decimal(12, 2)
+    active       Boolean  @default(true)
+    createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+    updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz
+
+    supplierProducts SupplierProduct[]
+
+    @@map("suppliers")
+}
+
+model SupplierProduct {
+    id                String  @id @db.Uuid
+    supplierId        String  @map("supplier_id") @db.Uuid
+    productId         String  @map("product_id") @db.Uuid
+    leadTimeMeanWeeks Decimal @map("lead_time_mean_weeks") @db.Decimal(5, 2)
+    leadTimeStdWeeks  Decimal @map("lead_time_std_weeks") @db.Decimal(5, 2)
+    unitCost          Decimal @map("unit_cost") @db.Decimal(12, 2)
+    moq               Int
+    isPrimary         Boolean @default(false) @map("is_primary")
+    active            Boolean @default(true)
+
+    supplier Supplier @relation(fields: [supplierId], references: [id])
+    product  Product  @relation(fields: [productId], references: [id])
+
+    @@unique([supplierId, productId])
+    @@map("supplier_products")
+}
+
+model InventoryItem {
+    productId   String   @id @map("product_id") @db.Uuid
+    onHand      Int      @default(0) @map("on_hand")
+    reserved    Int      @default(0)
+    onOrder     Int      @default(0) @map("on_order")
+    backordered Int      @default(0)
+    updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz
+
+    product Product @relation(fields: [productId], references: [id])
+
+    @@map("inventory_items")
+}
+
+model StockMovement {
+    id            String        @id @db.Uuid
+    productId     String        @map("product_id") @db.Uuid
+    type          MovementType
+    signedQty     Int           @map("signed_qty")
+    week          DateTime      @db.Date
+    referenceType ReferenceType @map("reference_type")
+    referenceId   String?       @map("reference_id") @db.Uuid
+    reason        String?
+    createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+    product Product @relation(fields: [productId], references: [id])
+
+    @@index([productId, createdAt])
+    @@index([week])
+    @@map("stock_movements")
+}
