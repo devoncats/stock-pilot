@@ -10,7 +10,7 @@ export default async function setup(project: TestProject) {
     const databaseUrl = container.getConnectionUri();
 
     execSync("pnpm exec prisma migrate deploy", {
-        cwd: fileURLToPath(new URL("../../", import.meta.url)),
+        cwd: fileURLToPath(new URL("../../../", import.meta.url)),
         env: { ...process.env, DATABASE_URL: databaseUrl },
         stdio: "inherit",
     });
