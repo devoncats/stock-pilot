@@ -46,6 +46,7 @@ model Product {
     supplierProducts SupplierProduct[]
     inventoryItems   InventoryItem[]
     stockMovements   StockMovement[]
+    demandHistories  DemandHistory[]
 
     @@map("products")
 }
@@ -110,4 +111,16 @@ model StockMovement {
     @@index([productId, createdAt])
     @@index([week])
     @@map("stock_movements")
+}
+
+model DemandHistory {
+    id        String   @id @db.Uuid
+    productId String   @map("product_id") @db.Uuid
+    week      DateTime @db.Date
+    qty       Int
+
+    product Product @relation(fields: [productId], references: [id])
+
+    @@unique([productId, week])
+    @@map("demand_history")
 }
