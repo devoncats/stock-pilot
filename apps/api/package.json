@@ -34,6 +34,7 @@
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@swc/core": "^1.15.43",
+    "@testcontainers/postgresql": "^12.0.4",
     "@types/express": "^5.0.0",
     "@types/node": "^24.13.3",
     "@types/pg": "^8.20.0",
