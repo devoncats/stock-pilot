@@ -1,4 +1,4 @@
-import type { PrismaService } from "../../../src/shared/prisma/prisma.service.js";
+import type { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 export async function resetDatabase(prisma: PrismaService): Promise<void> {
     await prisma.$executeRawUnsafe(`

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { PrismaService } from "../../src/shared/prisma/prisma.service.js";
+import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 describe("schema", () => {
     let prisma: PrismaService;

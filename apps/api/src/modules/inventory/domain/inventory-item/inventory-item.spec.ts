@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { productId } from "../../../catalog/domain/product-id/product-id.js";
+import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { InventoryItem } from "./inventory-item.js";
 
 const validProps = () => ({

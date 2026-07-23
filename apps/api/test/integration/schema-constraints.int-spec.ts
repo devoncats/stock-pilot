@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { PrismaService } from "../../src/shared/prisma/prisma.service.js";
+import { PrismaService } from "@/shared/prisma/prisma.service.js";
 import { resetDatabase } from "./support/reset.js";
 import { seedProduct, seedSupplier } from "./support/seed.js";
 

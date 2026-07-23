@@ -1,4 +1,4 @@
-import type { Money } from "../../../../shared/domain/money/money.js";
+import type { Money } from "@/shared/domain/money/money.js";
 import type { ProductId } from "../product-id/product-id.js";
 import type { Sku } from "../sku/sku.js";
 

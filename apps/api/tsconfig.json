@@ -9,6 +9,10 @@
         "outDir": "./dist",
         "sourceMap": true,
         "incremental": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"],
+        },
     },
     "include": ["src/**/*", "test/**/*"],
 }

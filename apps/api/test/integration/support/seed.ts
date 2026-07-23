@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { PrismaService } from "../../../src/shared/prisma/prisma.service.js";
+import type { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 // Datos base válidos para satisfacer las FKs de los tests de constraints.
 export async function seedProduct(

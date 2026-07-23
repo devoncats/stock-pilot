@@ -1,4 +1,4 @@
-import { ProductId } from "../../../catalog/domain/product-id/product-id.js";
+import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 
 export interface InventoryItemProps {
     productId: ProductId;
