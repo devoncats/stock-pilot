@@ -8,3 +8,5 @@ allowBuilds:
   "@biomejs/biome": true
   "@swc/core": true
   sharp: true
+  "@prisma/engines": true
+  prisma: true
