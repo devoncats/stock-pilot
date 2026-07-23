@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
+import { resetDatabase } from "test/integration/support/reset.js";
+import { seedProduct, seedSupplier } from "test/integration/support/seed.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
-import { resetDatabase } from "./support/reset.js";
-import { seedProduct, seedSupplier } from "./support/seed.js";
 
 const prisma = new PrismaService();
 
