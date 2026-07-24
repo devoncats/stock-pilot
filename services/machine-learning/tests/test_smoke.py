@@ -1,4 +1,4 @@
-from stock_pilot_machine_learning import add
+from stock_pilot_ml import add
 
 
 def test_add() -> None:

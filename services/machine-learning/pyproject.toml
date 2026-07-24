@@ -1,5 +1,5 @@
 [project]
-name = "stock-pilot-machine-learning"
+name = "stock-pilot-ml"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -7,7 +7,9 @@ authors = [
     { name = "devoncats", email = "devoncats.dev@outlook.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pandas>=3.0.5",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.29,<0.12.0"]
@@ -15,6 +17,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pandas-stubs>=3.0.3.260530",
     "pytest>=9.1.1",
     "ruff>=0.15.22",
 ]
