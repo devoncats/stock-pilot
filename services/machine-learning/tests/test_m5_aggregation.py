@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+
 from stock_pilot_ml.m5_aggregation import aggregate_m5
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "m5"
