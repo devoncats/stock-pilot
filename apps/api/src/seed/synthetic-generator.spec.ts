@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
     GenerateParams,
-    generateSyntheticSku,
+    generateSyntheticSkus,
     SyntheticSku,
 } from "./synthetic-generator.js";
 
@@ -15,12 +15,12 @@ const syntheticSkuParams = (
     ...override,
 });
 
-describe("generateSyntheticSku", () => {
+describe("generateSyntheticSkus", () => {
     it("same seed produces identical output", () => {
         const params = syntheticSkuParams();
 
-        const skus1 = generateSyntheticSku(params);
-        const skus2 = generateSyntheticSku(params);
+        const skus1 = generateSyntheticSkus(params);
+        const skus2 = generateSyntheticSkus(params);
 
         expect(skus1).toEqual(skus2);
     });
@@ -29,8 +29,8 @@ describe("generateSyntheticSku", () => {
         const params1 = syntheticSkuParams({ seed: 20 });
         const params2 = syntheticSkuParams({ seed: 25 });
 
-        const skus1 = generateSyntheticSku(params1);
-        const skus2 = generateSyntheticSku(params2);
+        const skus1 = generateSyntheticSkus(params1);
+        const skus2 = generateSyntheticSkus(params2);
 
         expect(skus1).not.toEqual(skus2);
     });
@@ -39,8 +39,8 @@ describe("generateSyntheticSku", () => {
         const params1 = syntheticSkuParams({ count: 5 });
         const params2 = syntheticSkuParams({ count: 10 });
 
-        const skus1 = generateSyntheticSku(params1);
-        const skus2 = generateSyntheticSku(params2);
+        const skus1 = generateSyntheticSkus(params1);
+        const skus2 = generateSyntheticSkus(params2);
 
         expect(skus2.slice(0, params1.count)).toEqual(skus1);
     });
@@ -51,7 +51,7 @@ describe("generateSyntheticSku", () => {
             weeks: 4,
         });
 
-        const skus = generateSyntheticSku(params);
+        const skus = generateSyntheticSkus(params);
 
         expect(skus.length).toBe(params.count);
 
@@ -68,7 +68,7 @@ describe("generateSyntheticSku", () => {
     it("every week falls on a Monday", () => {
         const params = syntheticSkuParams();
 
-        const skus = generateSyntheticSku(params);
+        const skus = generateSyntheticSkus(params);
 
         const weeks = skus.flatMap((sku) =>
             sku.weeklyDemand.map((w) => w.week),
@@ -82,7 +82,7 @@ describe("generateSyntheticSku", () => {
     it("quantities are non-negative integers", () => {
         const params = syntheticSkuParams();
 
-        const skus = generateSyntheticSku(params);
+        const skus = generateSyntheticSkus(params);
 
         const quantities = skus.flatMap((sku) =>
             sku.weeklyDemand.map((w) => w.qty),
@@ -98,7 +98,7 @@ describe("generateSyntheticSku", () => {
     it("covers X/Y/Z and Z is intermittent", () => {
         const params = syntheticSkuParams({ count: 9, weeks: 52 });
 
-        const skus = generateSyntheticSku(params);
+        const skus = generateSyntheticSkus(params);
 
         expect(new Set(skus.map((sku) => sku.xyzClass))).toEqual(
             new Set(["X", "Y", "Z"]),

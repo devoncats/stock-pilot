@@ -9,7 +9,7 @@ export type XyzClass = (typeof CLASSES)[number];
 
 type Category = (typeof CATEGORIES)[number];
 
-export interface SyntheticWeek {
+export interface WeeklyDemand {
     week: string;
     qty: number;
 }
@@ -20,7 +20,7 @@ export interface SyntheticSku {
     price: number;
     unitCost: number;
     xyzClass: XyzClass;
-    weeklyDemand: SyntheticWeek[];
+    weeklyDemand: WeeklyDemand[];
 }
 
 export interface GenerateParams {
@@ -79,7 +79,7 @@ function weeklyQuantities(
     return raw.map((value) => Math.max(0, Math.round(value)));
 }
 
-export function generateSyntheticSku(params: GenerateParams): SyntheticSku[] {
+export function generateSyntheticSkus(params: GenerateParams): SyntheticSku[] {
     const mondays = mondaysFrom(params.startWeek, params.weeks);
 
     const syntheticSkus: SyntheticSku[] = Array.from(
@@ -98,7 +98,7 @@ export function generateSyntheticSku(params: GenerateParams): SyntheticSku[] {
                 base,
                 params.weeks,
                 random,
-            ).map((qty, w) => ({ week: mondays[w], qty })) as SyntheticWeek[];
+            ).map((qty, w) => ({ week: mondays[w], qty })) as WeeklyDemand[];
 
             const sku: SyntheticSku = {
                 sku: `SYN-${String(i + 1).padStart(4, "0")}`,
