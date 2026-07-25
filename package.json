@@ -14,6 +14,7 @@
     "test": "pnpm -r test && pnpm test:ml",
     "test:ml": "uv run --directory services/machine-learning pytest",
     "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "seed": "pnpm --filter api seed",
     "smoke:infrastructure": "node infrastructure/smoke.ts",
     "smoke:apps": "node infrastructure/smoke.ts --apps",
     "compose:up": "docker compose -f infrastructure/docker-compose.yaml --env-file .env up -d",
