@@ -1,0 +1,4 @@
+id,item_id,dept_id,cat_id,store_id,state_id,d_1,d_2,d_3,d_4,d_5,d_6,d_7,d_8,d_9,d_10,d_11,d_12,d_13,d_14
+FOODS_1_001_CA_1_validation,FOODS_1_001,FOODS_1,FOODS,CA_1,CA,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+HOBBIES_1_001_CA_1_validation,HOBBIES_1_001,HOBBIES_1,HOBBIES,CA_1,CA,0,2,0,3,0,0,5,0,0,4,0,0,0,1
+FOODS_1_002_TX_1_validation,FOODS_1_002,FOODS_1,FOODS,TX_1,TX,9,9,9,9,9,9,9,9,9,9,9,9,9,9

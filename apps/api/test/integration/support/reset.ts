@@ -2,7 +2,7 @@ import type { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 export async function resetDatabase(prisma: PrismaService): Promise<void> {
     await prisma.$executeRawUnsafe(`
-        TRUNCATE stock_movements, inventory_items, supplier_products, suppliers, products
+        TRUNCATE stock_movements, inventory_items, supplier_products, suppliers, products, demand_history
         RESTART IDENTITY CASCADE
     `);
 }

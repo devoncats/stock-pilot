@@ -97,6 +97,7 @@ pnpm smoke:apps             # the above, plus api /health and the web root
 | `pnpm build` | Builds every workspace |
 | `pnpm test` | Vitest across the TS workspaces, then pytest in `services/machine-learning` |
 | `pnpm dev` | Runs `api` and `web` in parallel |
+| `pnpm seed` | Loads master data, sourcing, inventory and demand history — see [Seed data](#seed-data) |
 | `pnpm format` | Formats the repository with Biome |
 | `pnpm typecheck` | `tsc --noEmit` in every TS workspace |
 | `pnpm compose:up` | Starts Postgres and Redis only — the daily path |
@@ -138,6 +139,63 @@ pnpm --filter @stock-pilot/api db:migrate
 
 Triggers and CHECKs survive Prisma's diff (it doesn't model them), so re-running
 `migrate dev` reports "Already in sync" — no drift.
+
+## Seed data
+
+Seeding is two steps in two languages. Python aggregates the raw
+[M5 Forecasting — Accuracy](https://www.kaggle.com/competitions/m5-forecasting-accuracy)
+dataset into weekly demand; TypeScript loads that file, generates synthetic SKUs
+alongside it, and writes everything to Postgres. The dataset is ~450 MB and stays
+out of the repository — `data/` is gitignored.
+
+**1. Download M5 into `data/`.**
+
+```bash
+kaggle competitions download -c m5-forecasting-accuracy -p data
+```
+
+Then unzip it in place — `Expand-Archive -Path data\m5-forecasting-accuracy.zip
+-DestinationPath data` on Windows, `unzip` elsewhere.
+
+> Accept the competition rules on the Kaggle website first. Without that the
+> download returns `403` even when the credentials are valid.
+
+**2. Aggregate it into weekly demand.**
+
+```bash
+uv run --directory services/machine-learning python -m stock_pilot_ml.cli
+```
+
+This writes `data/weekly-demand.csv` — daily sales for a single store, summed
+into the Monday of each ISO week.
+
+**3. Migrate and seed.**
+
+```bash
+pnpm compose:up
+pnpm --filter @stock-pilot/api db:migrate
+pnpm seed
+```
+
+| Variable | Default | Consumed by |
+| --- | --- | --- |
+| `SEED_STORE` | `CA_1` | aggregation (Python) |
+| `SEED_SKU_COUNT` | `200` | aggregation (Python) |
+| `SEED_SYNTH_COUNT` | `50` | seed (TypeScript) |
+| `SEED_RANDOM_SEED` | `42` | seed (TypeScript) |
+| `SEED_START_WEEK` | `2011-01-24` | seed (TypeScript) |
+| `SEED_SYNTHETIC_WEEKS` | `273` | seed (TypeScript) |
+| `SEED_WEEKLY_DEMAND_PATH` | `../../data/weekly-demand.csv` | seed (TypeScript) |
+
+The seed is **idempotent and reproducible**: rows are upserted by natural key and
+the synthetic data comes from a seeded PRNG, so a second run reports identical
+counts and a given seed always produces the same SKUs. Initial stock is recorded
+as a `RECEIPT` movement rather than written straight to `on_hand`, so the ledger
+stays the source of truth.
+
+Only step 2's output is required — the seed reads `data/weekly-demand.csv` and
+never touches the raw M5 files. A hand-written CSV with the same columns is
+enough for a small local dataset.
 
 ## Conventions
 

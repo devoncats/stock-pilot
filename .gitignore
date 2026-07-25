@@ -54,3 +54,5 @@ Desktop.ini
 apps/web/next-env.d.ts
 
 apps/api/src/generated/
+
+data/

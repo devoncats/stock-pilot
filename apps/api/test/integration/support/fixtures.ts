@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { PrismaService } from "@/shared/prisma/prisma.service.js";
 
-// Datos base válidos para satisfacer las FKs de los tests de constraints.
-export async function seedProduct(
+export async function createProduct(
     prisma: PrismaService,
     sku = `SKU-${randomUUID().slice(0, 8)}`,
 ) {
@@ -18,7 +17,7 @@ export async function seedProduct(
     });
 }
 
-export async function seedSupplier(prisma: PrismaService) {
+export async function createSupplier(prisma: PrismaService) {
     return prisma.supplier.create({
         data: {
             id: randomUUID(),

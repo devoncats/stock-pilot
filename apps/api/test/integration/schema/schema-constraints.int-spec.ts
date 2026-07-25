@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
+import {
+    createProduct,
+    createSupplier,
+} from "test/integration/support/fixtures.js";
 import { resetDatabase } from "test/integration/support/reset.js";
-import { seedProduct, seedSupplier } from "test/integration/support/seed.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
@@ -12,7 +15,7 @@ describe("schema invariants", () => {
 
     // CHECK — reserved <= on_hand
     it("rejects reserved > on_hand", async () => {
-        const product = await seedProduct(prisma);
+        const product = await createProduct(prisma);
         await expect(
             prisma.$executeRaw`
                 INSERT INTO inventory_items (product_id, on_hand, reserved)
@@ -23,7 +26,7 @@ describe("schema invariants", () => {
 
     // TRIGGER — append-only
     it("rejects UPDATE on stock_movements", async () => {
-        const product = await seedProduct(prisma);
+        const product = await createProduct(prisma);
         const id = randomUUID();
         await prisma.$executeRaw`
             INSERT INTO stock_movements (id, product_id, type, signed_qty, week, reference_type)
@@ -35,8 +38,8 @@ describe("schema invariants", () => {
     });
 
     it("rejects moq = 0", async () => {
-        const product = await seedProduct(prisma);
-        const supplier = await seedSupplier(prisma);
+        const product = await createProduct(prisma);
+        const supplier = await createSupplier(prisma);
         await expect(prisma.$executeRaw`
         INSERT INTO supplier_products
           (id, supplier_id, product_id, lead_time_mean_weeks, lead_time_std_weeks, unit_cost, moq, is_primary, active)
@@ -45,9 +48,9 @@ describe("schema invariants", () => {
     });
 
     it("rejects a second primary supplier for the same product", async () => {
-        const product = await seedProduct(prisma);
-        const s1 = await seedSupplier(prisma);
-        const s2 = await seedSupplier(prisma);
+        const product = await createProduct(prisma);
+        const s1 = await createSupplier(prisma);
+        const s2 = await createSupplier(prisma);
         const insertPrimary = (supplierId: string) => prisma.$executeRaw`
         INSERT INTO supplier_products
           (id, supplier_id, product_id, lead_time_mean_weeks, lead_time_std_weeks, unit_cost, moq, is_primary, active)
@@ -59,7 +62,7 @@ describe("schema invariants", () => {
 
     // CHECK signed_qty <> 0 — uso ADJUSTMENT para aislar (RECEIPT además exige > 0)
     it("rejects signed_qty = 0", async () => {
-        const p = await seedProduct(prisma);
+        const p = await createProduct(prisma);
         await expect(prisma.$executeRaw`
         INSERT INTO stock_movements (id, product_id, type, signed_qty, week, reference_type)
         VALUES (${randomUUID()}::uuid, ${p.id}::uuid, 'ADJUSTMENT', 0, '2026-07-20', 'MANUAL')
@@ -68,7 +71,7 @@ describe("schema invariants", () => {
 
     // CHECK signo/tipo — RECEIPT debe ser > 0
     it("rejects RECEIPT with negative qty", async () => {
-        const p = await seedProduct(prisma);
+        const p = await createProduct(prisma);
         await expect(prisma.$executeRaw`
         INSERT INTO stock_movements (id, product_id, type, signed_qty, week, reference_type)
         VALUES (${randomUUID()}::uuid, ${p.id}::uuid, 'RECEIPT', -5, '2026-07-20', 'MANUAL')
@@ -77,7 +80,7 @@ describe("schema invariants", () => {
 
     // CHECK week es lunes — 2026-07-21 es martes
     it("rejects a non-Monday week", async () => {
-        const p = await seedProduct(prisma);
+        const p = await createProduct(prisma);
         await expect(prisma.$executeRaw`
         INSERT INTO stock_movements (id, product_id, type, signed_qty, week, reference_type)
         VALUES (${randomUUID()}::uuid, ${p.id}::uuid, 'RECEIPT', 10, '2026-07-21', 'MANUAL')
@@ -86,7 +89,7 @@ describe("schema invariants", () => {
 
     // TRIGGER — DELETE bloqueado
     it("rejects DELETE on stock_movements", async () => {
-        const p = await seedProduct(prisma);
+        const p = await createProduct(prisma);
         const id = randomUUID();
         await prisma.$executeRaw`
         INSERT INTO stock_movements (id, product_id, type, signed_qty, week, reference_type)
@@ -99,7 +102,7 @@ describe("schema invariants", () => {
 
     // POSITIVO — este pasa desde ya (verde)
     it("allows a valid INSERT into stock_movements", async () => {
-        const p = await seedProduct(prisma);
+        const p = await createProduct(prisma);
         await expect(prisma.$executeRaw`
         INSERT INTO stock_movements (id, product_id, type, signed_qty, week, reference_type)
         VALUES (${randomUUID()}::uuid, ${p.id}::uuid, 'RECEIPT', 10, '2026-07-20', 'MANUAL')
@@ -115,7 +118,7 @@ describe("schema invariants", () => {
     });
 
     it("rejects negative on_hand", async () => {
-        const p = await seedProduct(prisma);
+        const p = await createProduct(prisma);
         await expect(prisma.$executeRaw`
         INSERT INTO inventory_items (product_id, on_hand) VALUES (${p.id}::uuid, -1)
     `).rejects.toThrow();
