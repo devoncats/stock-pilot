@@ -93,9 +93,11 @@ pnpm smoke:apps             # the above, plus api /health and the web root
 
 | Script | What it does |
 | --- | --- |
-| `pnpm check` | Quality gate: `typecheck` + `lint` + `format:check` + `lint:ml` |
+| `pnpm check` | Quality gate for both lanes: `check:node` + `lint:ml` |
+| `pnpm check:node` | Node lane only: `typecheck` + `typecheck:infrastructure` + `lint` + `format:check` |
 | `pnpm build` | Builds every workspace |
-| `pnpm test` | Vitest across the TS workspaces, then pytest in `services/machine-learning` |
+| `pnpm test` | Both lanes: `test:node` + `test:ml` |
+| `pnpm test:node` | Vitest across the TS workspaces |
 | `pnpm dev` | Runs `api` and `web` in parallel |
 | `pnpm seed` | Loads master data, sourcing, inventory and demand history — see [Seed data](#seed-data) |
 | `pnpm format` | Formats the repository with Biome |
@@ -108,8 +110,60 @@ pnpm smoke:apps             # the above, plus api /health and the web root
 | `pnpm smoke:infrastructure` | Checks Postgres and Redis are answering |
 | `pnpm smoke:apps` | Same, plus the API `/health` and the web root |
 
-`pnpm check` is the single quality gate — CI calls it rather than re-listing the
-individual commands, so local and CI cannot drift.
+`pnpm check` and `pnpm test` are the local quality gates. They compose the two
+lanes — Node and Python — and CI calls the lane scripts directly rather than
+re-listing the individual commands, so the Node lane cannot drift between local
+and CI. See [Continuous integration](#continuous-integration) for how the Python
+lane differs.
+
+## Continuous integration
+
+`.github/workflows/ci.yaml` runs on every pull request to `main` and on every
+push to `main`. Stale runs are cancelled by `concurrency`, and the workflow holds
+`permissions: contents: read` — it reads the repository and nothing else.
+
+| Job | What it runs |
+| --- | --- |
+| `node` | `pnpm install --frozen-lockfile` → build `@stock-pilot/shared` → `check:node` → `test:node` → `build` |
+| `python` | `uv sync` → `uv run ruff check .` → `uv run pytest`, in `services/machine-learning` |
+| `meta` | actionlint over the workflow files, then commitlint over the pull request's commit range |
+
+The three jobs run in parallel. Integration tests use the runner's Docker through
+Testcontainers, exactly as they do locally.
+
+**`DATABASE_URL` is set to a placeholder in the `node` and `meta` jobs, and it is
+not a secret — do not move it to GitHub Secrets.** `apps/api` runs
+`prisma generate` on `postinstall`, and `prisma.config.ts` resolves
+`env("DATABASE_URL")` eagerly when the config file loads. The root `.env` is
+gitignored, so it does not exist on a CI runner and `pnpm install` fails outright
+without the variable. The value points at nothing on purpose: integration tests
+receive their real connection string from Testcontainers at runtime, and dotenv
+does not overwrite variables already present in the environment.
+
+**Building `@stock-pilot/shared` before the checks is load-bearing, not a
+leftover.** The package exposes its types from `dist/`, which is gitignored, and
+both `apps/api` and `apps/web` import it — a clean checkout does not typecheck
+until it is built. It is filtered rather than a full `pnpm build` so that
+typecheck fails fast; the complete build still runs at the end as its own check.
+
+**The `python` job calls `uv` directly instead of `pnpm lint:ml` / `pnpm test:ml`.**
+pnpm's `verifyDepsBeforeRun` setting defaults to `install`, so any `pnpm <script>`
+on a clean checkout triggers a full install of the monorepo — plus Prisma's
+postinstall — before running anything. Paying for 800-odd packages to run a
+`ruff check` is not worth it, and it would couple the Python lane to the health of
+the Node toolchain. The trade-off is deliberate: **if the ml lane gains another
+check, both `package.json` and the workflow need updating.**
+
+No runtime version is written into the workflow. Node comes from `.nvmrc`, pnpm
+from the `packageManager` field, and Python from `.python-version`, so there is
+exactly one place to change each.
+
+### Required status checks
+
+Branch protection is configured in the GitHub UI, not in this repository. On
+`main`: require a pull request before merging, require the status checks **`node`**,
+**`python`** and **`meta`** in strict mode (branches must be up to date), and do not
+allow bypassing these settings.
 
 ## Database migrations
 
