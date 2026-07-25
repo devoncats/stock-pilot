@@ -24,7 +24,7 @@ describe("seed", () => {
     beforeEach(() => resetDatabase(prisma));
     afterAll(() => prisma.$disconnect());
 
-    it("generate atleast 1 product", async () => {
+    it("generate at least 1 product", async () => {
         const options = seedOptions();
 
         const summary = await runSeed(prisma, options);
