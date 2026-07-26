@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
+import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
 import { InventoryItem } from "./inventory-item.js";
 
 const validProps = () => ({
@@ -17,7 +18,7 @@ describe("InventoryItem", () => {
                 ...validProps(),
                 productId: productId(""),
             }),
-        ).toThrow();
+        ).toThrow(InvalidValueError);
     });
 
     it("derives available as onHand - reserved", () => {
@@ -41,13 +42,13 @@ describe("InventoryItem", () => {
     it("rejects reserved greater than onHand", () => {
         expect(() =>
             InventoryItem.create({ ...validProps(), onHand: 5, reserved: 10 }),
-        ).toThrow();
+        ).toThrow(InvalidValueError);
     });
 
     it("rejects negative quantities", () => {
         expect(() =>
             InventoryItem.create({ ...validProps(), onHand: -1 }),
-        ).toThrow();
+        ).toThrow(InvalidValueError);
     });
 
     it("handles all-zero state", () => {

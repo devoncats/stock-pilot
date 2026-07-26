@@ -1,4 +1,5 @@
 import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
+import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
 
 export interface InventoryItemProps {
     productId: ProductId;
@@ -13,21 +14,25 @@ export class InventoryItem {
 
     static create(props: InventoryItemProps): InventoryItem {
         if (!props.productId) {
-            throw new Error("[InventoryItem]: Product ID cannot be empty");
+            throw new InvalidValueError(
+                "[InventoryItem]: Product ID cannot be empty",
+            );
         }
 
         if (props.productId.trim().length === 0) {
-            throw new Error("[InventoryItem]: Product ID cannot be empty");
+            throw new InvalidValueError(
+                "[InventoryItem]: Product ID cannot be empty",
+            );
         }
 
         if (props.reserved > props.onHand) {
-            throw new Error(
+            throw new InvalidValueError(
                 "[InventoryItem]: Reserved quantity cannot exceed on-hand quantity",
             );
         }
 
         if (props.onHand < 0) {
-            throw new Error(
+            throw new InvalidValueError(
                 "[InventoryItem]: On-hand quantity cannot be negative",
             );
         }
