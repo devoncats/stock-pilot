@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MovementType } from "@/generated/prisma/enums.js";
 import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
-import { InvalidMovementError } from "@/modules/inventory/domain/errors/invalid-movement.error.js";
+import { InvalidMovementError } from "@/modules/inventory/domain/errors/invalid-movement/invalid-movement.error.js";
 import { MovementReference } from "@/modules/inventory/domain/movement-reference/movement-reference.js";
 import {
     StockMovement,
