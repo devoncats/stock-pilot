@@ -3,6 +3,19 @@ import { describe, expect, it } from "vitest";
 import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
 import { MovementReference } from "./movement-reference.js";
 
+/*
+not done
+MovementReference.purchaseOrder("PO-2026-001") → InvalidValueError ← el titular de la rama
+not done
+customerOrder("") → InvalidValueError
+not done
+Normaliza a minúsculas: purchaseOrder(UUID_EN_MAYUSCULAS).id sale en minúsculas
+not done
+purchaseOrder(UPPER).equals(purchaseOrder(lower)) → true ← el que protege el round-trip
+not done
+Recorta espacios: purchaseOrder(" uuid ") construye bien
+*/
+
 const PO_ID = "0192f8a0-0000-7000-8000-000000000001";
 
 describe("MovementReference", () => {
@@ -66,5 +79,38 @@ describe("MovementReference", () => {
                 MovementReference.customerOrder(PO_ID),
             ),
         ).toBe(false);
+    });
+
+    it("rejects a non-UUID id", () => {
+        expect(() => MovementReference.purchaseOrder("PO-2026-001")).toThrow(
+            InvalidValueError,
+        );
+    });
+
+    it("rejects an empty string id", () => {
+        expect(() => MovementReference.customerOrder("")).toThrow(
+            InvalidValueError,
+        );
+    });
+
+    it("normalizes the id to lowercase", () => {
+        const reference = MovementReference.purchaseOrder(PO_ID.toUpperCase());
+
+        expect(reference.id).toBe(PO_ID);
+    });
+
+    it("compares equal for the same id in different cases", () => {
+        const upperReference = MovementReference.purchaseOrder(
+            PO_ID.toUpperCase(),
+        );
+        const lowerReference = MovementReference.purchaseOrder(PO_ID);
+
+        expect(upperReference.equals(lowerReference)).toBe(true);
+    });
+
+    it("trims whitespace from the id", () => {
+        const reference = MovementReference.purchaseOrder(`  ${PO_ID}  `);
+
+        expect(reference.id).toBe(PO_ID);
     });
 });
