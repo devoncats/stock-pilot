@@ -1,13 +1,17 @@
+import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
+
 export class Money {
     private constructor(private readonly _cents: number) {}
 
     static fromCents(cents: number): Money {
         if (!Number.isInteger(cents)) {
-            throw new Error(`[Money]: Cents must be an integer, got ${cents}`);
+            throw new InvalidValueError(
+                `[Money]: Cents must be an integer, got ${cents}`,
+            );
         }
 
         if (cents < 0) {
-            throw new Error(
+            throw new InvalidValueError(
                 `[Money]: Cents must be a non-negative number, got ${cents}`,
             );
         }
@@ -19,7 +23,9 @@ export class Money {
         const match = /^(-?)(\d+)(?:\.(\d{1,2}))?$/.exec(value.trim());
 
         if (!match) {
-            throw new Error(`[Money]: Invalid decimal string: ${value}`);
+            throw new InvalidValueError(
+                `[Money]: Invalid decimal string: ${value}`,
+            );
         }
 
         const [, sign, whole, fraction = ""] = match;
