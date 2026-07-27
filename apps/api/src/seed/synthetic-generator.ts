@@ -33,6 +33,17 @@ export interface GenerateParams {
 function mondaysFrom(startWeek: string, count: number): string[] {
     const start = new Date(`${startWeek}T00:00:00Z`);
 
+    if (Number.isNaN(start.getTime())) {
+        throw new Error(`[seed] Invalid startWeek: ${startWeek}`);
+    }
+
+    // Every generated week inherits this alignment, and `demand_history` has a
+    // CHECK for ISODOW = 1. Failing here names the offending option; failing in
+    // Postgres names a constraint.
+    if (start.getUTCDay() !== 1) {
+        throw new Error(`[seed] startWeek must be a Monday, got ${startWeek}`);
+    }
+
     const mondays: string[] = Array.from({ length: count }, (_, w) => {
         const date = new Date(start);
         date.setUTCDate(start.getUTCDate() + w * 7);
@@ -71,8 +82,16 @@ function weeklyQuantities(
 
                 return intermittent;
             }
-            default:
-                throw new Error(`[weeklyDemand] Unknown xyzClass: ${xyzClass}`);
+            default: {
+                // Unreachable while XyzClass has three members. The `never`
+                // annotation is the point: adding a fourth class without a
+                // branch above fails the build instead of falling through.
+                const unhandled: never = xyzClass;
+
+                throw new Error(
+                    `[weeklyDemand] Unknown xyzClass: ${String(unhandled)}`,
+                );
+            }
         }
     });
 

@@ -32,16 +32,30 @@ describe("seed", () => {
         expect(summary.products).toBeGreaterThan(0);
     });
 
-    it("a second run creates no duplicates", async () => {
+    it("a second run creates no duplicates in any table", async () => {
         const options = seedOptions();
 
-        await runSeed(prisma, options);
-        const before = await prisma.product.count();
+        const first = await runSeed(prisma, options);
+        const second = await runSeed(prisma, options);
 
-        await runSeed(prisma, options);
-        const after = await prisma.product.count();
+        // The summary counts all six tables. Comparing only `products` would
+        // miss the case that matters most: an append-only ledger growing on
+        // every re-run.
+        expect(second).toEqual(first);
+    });
 
-        expect(after).toEqual(before);
+    it("fails with a seed error when a SKU has no demand weeks", async () => {
+        await expect(
+            runSeed(prisma, seedOptions({ weeks: 0 })),
+        ).rejects.toThrow(/has no demand weeks/);
+    });
+
+    it("rejects a startWeek that is not a Monday, before writing anything", async () => {
+        await expect(
+            runSeed(prisma, seedOptions({ startWeek: "2026-01-06" })),
+        ).rejects.toThrow(/must be a Monday/);
+
+        expect(await prisma.product.count()).toBe(0);
     });
 
     it("on_hand reconciles with the ledger", async () => {

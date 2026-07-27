@@ -243,9 +243,18 @@ pnpm seed
 
 The seed is **idempotent and reproducible**: rows are upserted by natural key and
 the synthetic data comes from a seeded PRNG, so a second run reports identical
-counts and a given seed always produces the same SKUs. Initial stock is recorded
-as a `RECEIPT` movement rather than written straight to `on_hand`, so the ledger
-stays the source of truth.
+counts and a given seed always produces the same SKUs.
+
+**Initial stock is a bootstrap, not a use case.** The seed writes the opening
+`RECEIPT` movement *and* the matching `on_hand` in the same transaction, instead
+of deriving the balance from the ledger the way `RecordStockMovement` does. It is
+the only writer allowed to do that, it never runs twice for the same SKU, and an
+integration test asserts `on_hand === Σ signed_qty` per product afterwards — so
+the ledger and the balance cannot drift apart. Nothing else in the system may
+write `on_hand` directly.
+
+`SEED_START_WEEK` must be a **Monday**: every generated week inherits its
+alignment, and `demand_history` has a CHECK for it.
 
 Only step 2's output is required — the seed reads `data/weekly-demand.csv` and
 never touches the raw M5 files. A hand-written CSV with the same columns is
