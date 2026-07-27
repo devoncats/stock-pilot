@@ -4,7 +4,7 @@ import { InventoryItemMapper } from "@/modules/inventory/adapter/persistence/inv
 import type { InventoryItemRepository } from "@/modules/inventory/application/commands/ports/inventory-item.repository.js";
 import type { InventoryItem } from "@/modules/inventory/domain/inventory-item/inventory-item.js";
 import { CLOCK, type Clock } from "@/shared/application/ports/clock.js";
-import type { TransactionContext } from "@/shared/transaction-context.js";
+import { TransactionContext } from "@/shared/transaction-context.js";
 
 @Injectable()
 export class PrismaInventoryItemRepository implements InventoryItemRepository {

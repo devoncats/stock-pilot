@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { InventoryController } from "@/modules/inventory/adapter/http/inventory.controller.js";
 import { KpisController } from "@/modules/inventory/adapter/http/kpis.controller.js";
+import { MovementsController } from "@/modules/inventory/adapter/http/movements.controller.js";
 import { PrismaInventoryItemRepository } from "@/modules/inventory/adapter/persistence/inventory-item/inventory-item.prisma.repository.js";
 import { PrismaInventoryQuery } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-query.prisma.repository.js";
 import { PrismaStockMovementRepository } from "@/modules/inventory/adapter/persistence/stock-movement/stock-movement.prisma.repository.js";
@@ -10,7 +11,7 @@ import { RecordStockMovement } from "@/modules/inventory/application/commands/re
 import { INVENTORY_QUERY_REPOSITORY } from "@/modules/inventory/application/queries/ports/inventory-query.repository.js";
 
 @Module({
-    controllers: [InventoryController, KpisController],
+    controllers: [InventoryController, KpisController, MovementsController],
     providers: [
         RecordStockMovement,
         {

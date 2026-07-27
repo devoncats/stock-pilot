@@ -19,7 +19,11 @@ import { SharedModule } from "@/shared/shared.module.js";
     providers: [
         {
             provide: APP_PIPE,
-            useValue: new ValidationPipe({ transform: true, whitelist: true }),
+            useValue: new ValidationPipe({
+                transform: true,
+                whitelist: true,
+                forbidNonWhitelisted: true,
+            }),
         },
         {
             provide: APP_FILTER,
