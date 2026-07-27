@@ -11,9 +11,11 @@ import type { InventoryItemWithProduct } from "@/modules/inventory/adapter/persi
 import { InventoryPositionMapper } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-position.mapper.js";
 import { StockMovementViewMapper } from "@/modules/inventory/adapter/persistence/stock-movement/stock-movement-view.mapper.js";
 import type {
+    DirValue,
     InventoryQuery,
     ListMovementsQueryParams,
     ListPositionsQueryParams,
+    SortValue,
 } from "@/modules/inventory/application/queries/ports/inventory-query.repository.js";
 import { calculateAverageWeeklyDemand } from "@/modules/inventory/domain/average-weekly-demand/calculate-average-weekly-demand.js";
 import {
@@ -31,6 +33,18 @@ import { PrismaService } from "@/shared/prisma/prisma.service.js";
 interface CoverageWindow {
     anchor: Date;
     start: Date;
+}
+
+interface PageRequest {
+    search: string | undefined;
+    offset: number;
+    limit: number;
+    dir: DirValue;
+}
+
+interface PositionPage {
+    rows: InventoryItemWithProduct[];
+    total: number;
 }
 
 @Injectable()
@@ -61,6 +75,15 @@ export class PrismaInventoryQuery implements InventoryQuery {
         );
     }
 
+    async positionExists(productId: ProductId): Promise<boolean> {
+        const row = await this.prisma.inventoryItem.findUnique({
+            where: { productId },
+            select: { productId: true },
+        });
+
+        return row !== null;
+    }
+
     async listPositions(
         params: ListPositionsQueryParams,
     ): Promise<Page<InventoryPositionDto>> {
@@ -72,40 +95,27 @@ export class PrismaInventoryQuery implements InventoryQuery {
             dir = "asc",
         } = params;
 
-        const where = this.whereFor(search);
-        const orderBy = this.orderByFor(sort, dir);
+        const request: PageRequest = { search, offset, limit, dir };
 
-        const [rows, total]: [InventoryItemWithProduct[], number] =
-            await this.prisma.$transaction([
-                this.prisma.inventoryItem.findMany({
-                    where,
-                    include: { product: true },
-                    ...(orderBy ? { orderBy, take: limit, skip: offset } : {}),
-                }),
-                this.prisma.inventoryItem.count({ where }),
-            ]);
+        const { rows, total } =
+            sort === "value"
+                ? await this.pageByValue(request)
+                : await this.pageByColumn({ ...request, sort });
 
         const window = await this.coverageWindow();
         const demand = await this.averageWeeklyDemandByProduct(
-            rows.map((row: InventoryItemWithProduct) => row.productId),
+            rows.map((row) => row.productId),
             window,
         );
 
-        let positions = rows.map((row: InventoryItemWithProduct) =>
+        const data = rows.map((row: InventoryItemWithProduct) =>
             InventoryPositionMapper.toDto(
                 row,
                 demand.get(row.productId) ?? null,
             ),
         );
 
-        if (!orderBy) {
-            positions = this.sortByValue(positions, dir).slice(
-                offset,
-                offset + limit,
-            );
-        }
-
-        return { data: positions, offset, limit, total };
+        return { data, offset, limit, total };
     }
 
     async listMovements(
@@ -176,6 +186,78 @@ export class PrismaInventoryQuery implements InventoryQuery {
         };
     }
 
+    private async pageByColumn({
+        search,
+        offset,
+        limit,
+        sort,
+        dir,
+    }: PageRequest & {
+        sort: Exclude<SortValue, "value">;
+    }): Promise<PositionPage> {
+        const where = this.whereFor(search);
+
+        const [rows, total]: [InventoryItemWithProduct[], number] =
+            await this.prisma.$transaction([
+                this.prisma.inventoryItem.findMany({
+                    where,
+                    include: { product: true },
+                    orderBy: this.orderByFor(sort, dir),
+                    take: limit,
+                    skip: offset,
+                }),
+                this.prisma.inventoryItem.count({ where }),
+            ]);
+
+        return { rows, total };
+    }
+
+    private async pageByValue({
+        search,
+        offset,
+        limit,
+        dir,
+    }: PageRequest): Promise<PositionPage> {
+        const direction = dir === "desc" ? Prisma.sql`DESC` : Prisma.sql`ASC`;
+
+        const filter = search
+            ? Prisma.sql`WHERE (p.sku ILIKE ${`%${search}%`} OR p.name ILIKE ${`%${search}%`})`
+            : Prisma.empty;
+
+        const [ordered, counted] = await this.prisma.$transaction([
+            this.prisma.$queryRaw<{ product_id: string }[]>`
+                SELECT i.product_id
+                FROM inventory_items i
+                JOIN products p ON p.id = i.product_id
+                ${filter}
+                ORDER BY i.on_hand * p.unit_cost ${direction}, p.sku ASC
+                LIMIT ${limit} OFFSET ${offset}
+            `,
+            this.prisma.$queryRaw<{ total: number }[]>`
+                SELECT COUNT(*)::int AS total
+                FROM inventory_items i
+                JOIN products p ON p.id = i.product_id
+                ${filter}
+            `,
+        ]);
+
+        const total = counted[0]?.total ?? 0;
+        const ids = ordered.map((row) => row.product_id);
+
+        if (ids.length === 0) {
+            return { rows: [], total };
+        }
+
+        const rows = await this.prisma.inventoryItem.findMany({
+            where: { productId: { in: ids } },
+            include: { product: true },
+        });
+
+        const byId = new Map(rows.map((row) => [row.productId, row]));
+
+        return { rows: ids.flatMap((id) => byId.get(id) ?? []), total };
+    }
+
     private whereFor(
         search: ListPositionsQueryParams["search"],
     ): Prisma.InventoryItemWhereInput {
@@ -197,26 +279,7 @@ export class PrismaInventoryQuery implements InventoryQuery {
         sort: ListPositionsQueryParams["sort"] = "sku",
         dir: ListPositionsQueryParams["dir"] = "asc",
     ): Prisma.InventoryItemOrderByWithRelationInput | undefined {
-        if (sort === "onHand") {
-            return { onHand: dir };
-        }
-
-        if (sort === "sku") {
-            return { product: { sku: dir } };
-        }
-
-        return undefined;
-    }
-
-    private sortByValue(
-        positions: InventoryPositionDto[],
-        dir: ListPositionsQueryParams["dir"] = "asc",
-    ): InventoryPositionDto[] {
-        const sorted = [...positions].sort(
-            (a, b) => a.valueCents - b.valueCents,
-        );
-
-        return dir === "desc" ? sorted.reverse() : sorted;
+        return sort === "onHand" ? { onHand: dir } : { product: { sku: dir } };
     }
 
     private async averageWeeklyDemandByProduct(

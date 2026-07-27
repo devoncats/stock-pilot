@@ -24,6 +24,8 @@ export type ListMovementsQueryParams = PageParams;
 export interface InventoryQuery {
     findPosition(productId: ProductId): Promise<InventoryPositionDto | null>;
 
+    positionExists(productId: ProductId): Promise<boolean>;
+
     listPositions(
         params: ListPositionsQueryParams,
     ): Promise<Page<InventoryPositionDto>>;

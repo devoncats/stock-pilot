@@ -4,6 +4,7 @@ import {
     Inject,
     NotFoundException,
     Param,
+    ParseUUIDPipe,
     Query,
 } from "@nestjs/common";
 import type {
@@ -50,12 +51,12 @@ export class InventoryController {
 
     @Get(":productId/movements")
     async listMovements(
-        @Param("productId") productId: ProductId,
+        @Param("productId", ParseUUIDPipe) productId: ProductId,
         @Query() query: ListMovementsQueryDto,
     ): Promise<Page<StockMovementDto>> {
-        const position = await this.inventoryQuery.findPosition(productId);
+        const exists = await this.inventoryQuery.positionExists(productId);
 
-        if (!position) {
+        if (!exists) {
             throw new NotFoundException(
                 `Inventory position not found for product ${productId}`,
             );
