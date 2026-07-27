@@ -14,6 +14,24 @@ import { PrismaService } from "@/shared/prisma/prisma.service.js";
 const prisma = new PrismaService();
 const query = new PrismaInventoryQuery(prisma);
 
+const positionWithValue = async (
+    sku: string,
+    onHand: number,
+    unitCost: string,
+    name = "Test product",
+) => {
+    const product = await createProduct(prisma, sku);
+
+    await prisma.product.update({
+        where: { id: product.id },
+        data: { unitCost, name },
+    });
+
+    await createInventoryItem(prisma, product.id, { onHand });
+
+    return product;
+};
+
 describe("PrismaInventoryQuery", () => {
     beforeEach(() => resetDatabase(prisma));
 
@@ -125,6 +143,74 @@ describe("PrismaInventoryQuery", () => {
 
             expect(page.data[0]?.coverageWeeks).toBeNull();
         });
+
+        it("paginates the value sort without dropping or repeating rows", async () => {
+            await positionWithValue("VAL-A", 1, "100.00");
+            await positionWithValue("VAL-B", 5, "10.00");
+            await positionWithValue("VAL-C", 1, "1.00");
+
+            const first = await query.listPositions({
+                offset: 0,
+                limit: 2,
+                sort: "value",
+                dir: "desc",
+            });
+
+            const second = await query.listPositions({
+                offset: 2,
+                limit: 2,
+                sort: "value",
+                dir: "desc",
+            });
+
+            expect(first.data.map((p) => p.sku)).toEqual(["VAL-A", "VAL-B"]);
+            expect(second.data.map((p) => p.sku)).toEqual(["VAL-C"]);
+            expect(first.total).toBe(3);
+            expect(second.total).toBe(3);
+        });
+
+        it("reports the global total on a page past the end", async () => {
+            await positionWithValue("VAL-A", 1, "100.00");
+            await positionWithValue("VAL-B", 5, "10.00");
+
+            const page = await query.listPositions({
+                offset: 10,
+                limit: 25,
+                sort: "value",
+                dir: "desc",
+            });
+
+            expect(page.data).toEqual([]);
+            expect(page.total).toBe(2);
+        });
+
+        it("breaks value ties by sku, in both directions", async () => {
+            await positionWithValue("ZZZ-TIE", 2, "5.00");
+            await positionWithValue("AAA-TIE", 1, "10.00");
+
+            const ascending = await query.listPositions({
+                offset: 0,
+                limit: 10,
+                sort: "value",
+                dir: "asc",
+            });
+
+            const descending = await query.listPositions({
+                offset: 0,
+                limit: 10,
+                sort: "value",
+                dir: "desc",
+            });
+
+            expect(ascending.data.map((p) => p.sku)).toEqual([
+                "AAA-TIE",
+                "ZZZ-TIE",
+            ]);
+            expect(descending.data.map((p) => p.sku)).toEqual([
+                "AAA-TIE",
+                "ZZZ-TIE",
+            ]);
+        });
     });
 
     describe("findPosition", () => {
@@ -153,6 +239,36 @@ describe("PrismaInventoryQuery", () => {
             expect(position?.available).toBe(7);
             expect(position?.position).toBe(14);
             expect(position?.valueCents).toBe(2500);
+        });
+
+        it("applies the search filter on the value-sorted path", async () => {
+            await positionWithValue("blue-widget", 1, "1.00", "Blue Widget");
+            await positionWithValue("red-widget", 1, "100.00", "Red Widget");
+            await positionWithValue("zzz-other", 1, "50.00", "Other");
+
+            const bySku = await query.listPositions({
+                offset: 0,
+                limit: 10,
+                sort: "value",
+                dir: "desc",
+                search: "WIDGET",
+            });
+
+            const byName = await query.listPositions({
+                offset: 0,
+                limit: 10,
+                sort: "value",
+                dir: "desc",
+                search: "blue widget",
+            });
+
+            expect(bySku.data.map((p) => p.sku)).toEqual([
+                "red-widget",
+                "blue-widget",
+            ]);
+            expect(bySku.total).toBe(2);
+            expect(byName.data.map((p) => p.sku)).toEqual(["blue-widget"]);
+            expect(byName.total).toBe(1);
         });
     });
 
@@ -276,6 +392,31 @@ describe("PrismaInventoryQuery", () => {
             );
 
             expect(position?.coverageWeeks).toBeNull();
+        });
+    });
+
+    describe("positionExists", () => {
+        it("is true for a product with an inventory item", async () => {
+            const product = await createProduct(prisma);
+            await createInventoryItem(prisma, product.id, { onHand: 1 });
+
+            expect(await query.positionExists(productId(product.id))).toBe(
+                true,
+            );
+        });
+
+        it("is false for a product with no inventory item", async () => {
+            const product = await createProduct(prisma);
+
+            expect(await query.positionExists(productId(product.id))).toBe(
+                false,
+            );
+        });
+
+        it("is false for an unknown product", async () => {
+            expect(await query.positionExists(productId(randomUUID()))).toBe(
+                false,
+            );
         });
     });
 });

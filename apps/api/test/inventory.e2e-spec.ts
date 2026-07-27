@@ -154,4 +154,12 @@ describe("Inventory (e2e)", () => {
             code: "INVENTORY_ITEM_NOT_FOUND",
         });
     });
+
+    it("GET /api/v1/inventory/:id/movements returns 404 for an unknown product", async () => {
+        const response = await request(app.getHttpServer()).get(
+            "/api/v1/inventory/00000000-0000-7000-8000-000000000000/movements",
+        );
+
+        expect(response.status).toBe(404);
+    });
 });
