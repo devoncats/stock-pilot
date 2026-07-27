@@ -29,6 +29,7 @@ export default defineConfig({
                 "**/*.module.ts",
                 "**/*.dto.ts",
                 "src/main.ts",
+                "src/health-check.ts",
                 "src/app.setup.ts",
             ],
             thresholds: {

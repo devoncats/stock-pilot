@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import type {
     InventoryKpisDto,
     InventoryPositionDto,
@@ -16,20 +16,26 @@ import type {
     ListMovementsQueryParams,
     ListPositionsQueryParams,
 } from "@/modules/inventory/application/queries/ports/inventory-query.repository.js";
+import { calculateAverageWeeklyDemand } from "@/modules/inventory/domain/average-weekly-demand/calculate-average-weekly-demand.js";
+import {
+    COVERAGE_WINDOW_WEEKS,
+    coverageWindowStart,
+} from "@/modules/inventory/domain/coverage-weeks/coverage-window.js";
 import {
     averageCoverageWeeks,
     skusOutOfStock,
 } from "@/modules/inventory/domain/kpis/aggregate-kpis.js";
 import { calculateInventoryValue } from "@/modules/inventory/domain/value/calculate-inventory-value.js";
-import { CLOCK, type Clock } from "@/shared/application/ports/clock.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
+
+interface CoverageWindow {
+    anchor: Date;
+    start: Date;
+}
 
 @Injectable()
 export class PrismaInventoryQuery implements InventoryQuery {
-    constructor(
-        private readonly prisma: PrismaService,
-        @Inject(CLOCK) private readonly clock: Clock,
-    ) {}
+    constructor(private readonly prisma: PrismaService) {}
 
     async findPosition(
         productId: ProductId,
@@ -43,7 +49,11 @@ export class PrismaInventoryQuery implements InventoryQuery {
             return null;
         }
 
-        const demand = await this.averageWeeklyDemandByProduct([productId]);
+        const window = await this.coverageWindow();
+        const demand = await this.averageWeeklyDemandByProduct(
+            [productId],
+            window,
+        );
 
         return InventoryPositionMapper.toDto(
             row,
@@ -75,8 +85,10 @@ export class PrismaInventoryQuery implements InventoryQuery {
                 this.prisma.inventoryItem.count({ where }),
             ]);
 
+        const window = await this.coverageWindow();
         const demand = await this.averageWeeklyDemandByProduct(
             rows.map((row: InventoryItemWithProduct) => row.productId),
+            window,
         );
 
         let positions = rows.map((row: InventoryItemWithProduct) =>
@@ -128,8 +140,10 @@ export class PrismaInventoryQuery implements InventoryQuery {
                 include: { product: true },
             });
 
+        const window = await this.coverageWindow();
         const demand = await this.averageWeeklyDemandByProduct(
             rows.map((row: InventoryItemWithProduct) => row.productId),
+            window,
         );
 
         const positions = rows.map((row: InventoryItemWithProduct) =>
@@ -157,6 +171,8 @@ export class PrismaInventoryQuery implements InventoryQuery {
                     onHand: position.onHand,
                 })),
             ),
+            demandHistoryThroughWeek:
+                window?.anchor.toISOString().slice(0, 10) ?? null,
         };
     }
 
@@ -205,34 +221,45 @@ export class PrismaInventoryQuery implements InventoryQuery {
 
     private async averageWeeklyDemandByProduct(
         productIds: string[],
+        window: CoverageWindow | null,
     ): Promise<Map<string, number>> {
-        if (productIds.length === 0) {
+        if (productIds.length === 0 || !window) {
             return new Map();
         }
-
-        const windowStart = await this.coverageWindowStart();
 
         const rows = await this.prisma.demandHistory.groupBy({
             by: ["productId"],
             where: {
                 productId: { in: productIds },
-                week: { gte: windowStart },
+                week: { gte: window.start },
             },
-            _avg: { qty: true },
+            _sum: { qty: true },
         });
 
-        return new Map(rows.map((row) => [row.productId, row._avg.qty ?? 0]));
+        return new Map(
+            rows.map((row) => [
+                row.productId,
+                calculateAverageWeeklyDemand({
+                    totalQty: row._sum.qty ?? 0,
+                    windowWeeks: COVERAGE_WINDOW_WEEKS,
+                }),
+            ]),
+        );
     }
 
-    private async coverageWindowStart(): Promise<Date> {
+    private async coverageWindow(): Promise<CoverageWindow | null> {
         const latest = await this.prisma.demandHistory.aggregate({
             _max: { week: true },
         });
 
-        const anchor = latest._max.week ?? this.clock.now();
-        const start = new Date(anchor);
-        start.setUTCDate(start.getUTCDate() - 13 * 7);
+        const anchor = latest._max.week;
 
-        return start;
+        if (!anchor) {
+            return null;
+        }
+
+        const start = coverageWindowStart(anchor);
+
+        return { anchor, start };
     }
 }

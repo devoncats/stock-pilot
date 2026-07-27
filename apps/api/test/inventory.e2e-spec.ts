@@ -77,7 +77,7 @@ describe("Inventory (e2e)", () => {
         expect(response.body.data[0]).toMatchObject({ reason: "newest" });
     });
 
-    it("GET /api/v1/kpis returns 200 with all four fields and integer cents", async () => {
+    it("GET /api/v1/kpis returns 200 with all five fields and integer cents", async () => {
         const product = await createProduct(prisma);
         await createInventoryItem(prisma, product.id, { onHand: 3 });
 
@@ -88,6 +88,7 @@ describe("Inventory (e2e)", () => {
         expect(response.body).toHaveProperty("inventoryValueCents");
         expect(response.body).toHaveProperty("averageCoverageWeeks");
         expect(response.body).toHaveProperty("skusOutOfStock");
+        expect(response.body).toHaveProperty("demandHistoryThroughWeek");
         expect(Number.isInteger(response.body.inventoryValueCents)).toBe(true);
     });
 
