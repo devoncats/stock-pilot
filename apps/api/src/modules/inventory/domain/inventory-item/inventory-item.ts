@@ -1,4 +1,5 @@
 import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
+import { derivePosition } from "@/modules/inventory/domain/derive-position/derive-position.js";
 import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
 
 export interface InventoryItemProps {
@@ -79,10 +80,10 @@ export class InventoryItem {
     }
 
     get available(): number {
-        return this.props.onHand - this.props.reserved;
+        return derivePosition(this.props).available;
     }
 
     get position(): number {
-        return this.props.onHand + this.props.onOrder - this.props.backordered;
+        return derivePosition(this.props).position;
     }
 }
