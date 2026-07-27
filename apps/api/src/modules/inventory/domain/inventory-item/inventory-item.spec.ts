@@ -6,11 +6,11 @@ import { InvalidMovementError } from "@/modules/inventory/domain/errors/invalid-
 import { MovementReference } from "@/modules/inventory/domain/movement-reference/movement-reference.js";
 import {
     StockMovement,
-    StockMovementProps,
+    type StockMovementProps,
 } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 import { stockMovementId } from "@/modules/inventory/domain/stock-movement-id/stock-movement-id.js";
 import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
-import { InventoryItem, InventoryItemProps } from "./inventory-item.js";
+import { InventoryItem, type InventoryItemProps } from "./inventory-item.js";
 
 const baseInventoryItemProps = (
     overrides: Partial<InventoryItemProps> = {},

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import type {
     InventoryKpisDto,
     InventoryPositionDto,
@@ -7,23 +7,27 @@ import type {
 } from "@stock-pilot/shared";
 import { Prisma } from "@/generated/prisma/client.js";
 import type { StockMovementModel } from "@/generated/prisma/models.js";
-import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
+import { type ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { ListMovementsQueryDto } from "@/modules/inventory/adapter/http/dto/list-movements-query.dto.js";
 import { ListPositionsQueryDto } from "@/modules/inventory/adapter/http/dto/list-positions-query.dto.js";
 import type { InventoryItemWithProduct } from "@/modules/inventory/adapter/persistence/inventory-position.mapper.js";
 import { InventoryPositionMapper } from "@/modules/inventory/adapter/persistence/inventory-position.mapper.js";
-import { StockMovementMapper } from "@/modules/inventory/adapter/persistence/stock-movement.mapper.js";
-import type { InventoryQuery } from "@/modules/inventory/application/ports/inventory-query.repository.js";
+import { StockMovementViewMapper } from "@/modules/inventory/adapter/persistence/stock-movement-view.mapper.js";
+import type { InventoryQuery } from "@/modules/inventory/application/queries/ports/inventory-query.repository.js";
 import {
     averageCoverageWeeks,
     skusOutOfStock,
 } from "@/modules/inventory/domain/kpis/aggregate-kpis.js";
 import { calculateInventoryValue } from "@/modules/inventory/domain/value/calculate-inventory-value.js";
+import { CLOCK, type Clock } from "@/shared/application/ports/clock.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 @Injectable()
 export class PrismaInventoryQuery implements InventoryQuery {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        @Inject(CLOCK) private readonly clock: Clock,
+    ) {}
 
     async findPosition(
         productId: ProductId,
@@ -113,7 +117,7 @@ export class PrismaInventoryQuery implements InventoryQuery {
         const page = Math.floor(offset / limit) + 1;
 
         return {
-            data: rows.map(StockMovementMapper.toDto),
+            data: rows.map(StockMovementViewMapper.toDto),
             page,
             limit,
             total,
@@ -227,7 +231,7 @@ export class PrismaInventoryQuery implements InventoryQuery {
             _max: { week: true },
         });
 
-        const anchor = latest._max.week ?? new Date();
+        const anchor = latest._max.week ?? this.clock.now();
         const start = new Date(anchor);
         start.setUTCDate(start.getUTCDate() - 13 * 7);
 

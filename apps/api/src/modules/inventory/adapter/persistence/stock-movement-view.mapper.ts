@@ -1,7 +1,7 @@
 import type { StockMovementDto } from "@stock-pilot/shared";
 import type { StockMovementModel } from "@/generated/prisma/models.js";
 
-export const StockMovementMapper = {
+export const StockMovementViewMapper = {
     toDto(row: StockMovementModel): StockMovementDto {
         return {
             id: row.id,

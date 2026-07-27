@@ -4,7 +4,7 @@ import type {
     Page,
     StockMovementDto,
 } from "@stock-pilot/shared";
-import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
+import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { ListMovementsQueryDto } from "@/modules/inventory/adapter/http/dto/list-movements-query.dto.js";
 import { ListPositionsQueryDto } from "@/modules/inventory/adapter/http/dto/list-positions-query.dto.js";
 

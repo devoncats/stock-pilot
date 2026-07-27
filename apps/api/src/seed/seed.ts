@@ -2,7 +2,10 @@ import { readFileSync } from "node:fs";
 import { uuidv7 } from "uuidv7";
 import { createPrng } from "@/seed/prng.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
-import { generateSyntheticSkus, WeeklyDemand } from "./synthetic-generator.js";
+import {
+    generateSyntheticSkus,
+    type WeeklyDemand,
+} from "./synthetic-generator.js";
 
 const SUPPLIER_COUNT = 10;
 const WEEKS_OF_COVER = 4;

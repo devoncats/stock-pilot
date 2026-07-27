@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy } from "@nestjs/common";
+import { Injectable, type OnModuleDestroy } from "@nestjs/common";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../../generated/prisma/client.js";
 

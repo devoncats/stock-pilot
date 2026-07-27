@@ -1,5 +1,5 @@
-import { InventoryItem } from "@/generated/prisma/client.js";
-import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
+import type { InventoryItem } from "@/generated/prisma/client.js";
+import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 
 export interface InventoryItemRepository {
     findByProductId(productId: ProductId): Promise<InventoryItem | null>;

@@ -1,6 +1,6 @@
-export { Page } from "./application/page.js";
-export { HealthStatus, isHealthStatus } from "./health.js";
-export {
+export type { Page } from "./application/page.js";
+export { type HealthStatus, isHealthStatus } from "./health.js";
+export type {
     InventoryKpisDto,
     InventoryPositionDto,
     StockMovementDto,

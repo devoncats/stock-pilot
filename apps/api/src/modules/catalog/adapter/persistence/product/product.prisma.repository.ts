@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { Page } from "@stock-pilot/shared";
+import type { Page } from "@stock-pilot/shared";
 import { ListProductQueryDto } from "@/modules/catalog/adapter/http/dto/list-product-query.dto.js";
 import { ProductMapper } from "@/modules/catalog/adapter/persistence/product/product.mapper.js";
-import { ProductRepository } from "@/modules/catalog/application/ports/product.repository.js";
+import type { ProductRepository } from "@/modules/catalog/application/ports/product.repository.js";
 import { Product } from "@/modules/catalog/domain/product/product.js";
-import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
+import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { Sku } from "@/modules/catalog/domain/sku/sku.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 

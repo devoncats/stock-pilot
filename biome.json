@@ -17,6 +17,10 @@
             "preset": "recommended",
             "suspicious": {
                 "noExplicitAny": "error"
+            },
+            "style": {
+                "useImportType": "error",
+                "useExportType": "error"
             }
         }
     },

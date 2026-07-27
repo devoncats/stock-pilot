@@ -5,7 +5,7 @@ import { InvalidMovementError } from "@/modules/inventory/domain/errors/invalid-
 import { MovementReference } from "@/modules/inventory/domain/movement-reference/movement-reference.js";
 import {
     StockMovement,
-    StockMovementProps,
+    type StockMovementProps,
 } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 import { stockMovementId } from "@/modules/inventory/domain/stock-movement-id/stock-movement-id.js";
 

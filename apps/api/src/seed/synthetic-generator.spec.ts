@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-    GenerateParams,
+    type GenerateParams,
     generateSyntheticSkus,
-    SyntheticSku,
+    type SyntheticSku,
 } from "./synthetic-generator.js";
 
 const syntheticSkuParams = (

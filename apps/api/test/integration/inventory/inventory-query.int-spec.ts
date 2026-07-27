@@ -8,17 +8,20 @@ import {
 import { resetDatabase } from "test/integration/support/reset.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import {
-    ProductId,
+    type ProductId,
     productId,
 } from "@/modules/catalog/domain/product-id/product-id.js";
-import { PrismaInventoryQuery } from "@/modules/inventory/adapter/persistence/inventory-query.prisma.adapter.js";
+import { PrismaInventoryQuery } from "@/modules/inventory/adapter/persistence/inventory-query.prisma.repository.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
+const FIXED_CLOCK = { now: () => new Date("2026-07-22T12:00:00Z") };
+
 const prisma = new PrismaService();
-const query = new PrismaInventoryQuery(prisma);
+const query = new PrismaInventoryQuery(prisma, FIXED_CLOCK);
 
 describe("PrismaInventoryQuery", () => {
     beforeEach(() => resetDatabase(prisma));
+
     afterAll(() => prisma.$disconnect());
 
     describe("listPositions", () => {

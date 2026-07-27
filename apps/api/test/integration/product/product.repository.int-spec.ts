@@ -4,7 +4,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { PrismaProductRepository } from "@/modules/catalog/adapter/persistence/product/product.prisma.repository.js";
 import {
     Product,
-    ProductProps,
+    type ProductProps,
 } from "@/modules/catalog/domain/product/product.js";
 import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { Sku } from "@/modules/catalog/domain/sku/sku.js";
