@@ -12,7 +12,7 @@ deployables that share PostgreSQL as the source of truth.
 | Tool | Version | Notes |
 | --- | --- | --- |
 | Node | 24 | see `.nvmrc` |
-| pnpm | 10+ | `corepack enable` |
+| pnpm | 11+ | pinned by `packageManager`; `corepack enable` |
 | uv | 0.11+ | Python toolchain for `services/machine-learning` |
 | Docker | latest | required for the local stack (Postgres, Redis) |
 
@@ -271,6 +271,19 @@ application logic. UI adapters require behaviour coverage but not test-first
 ordering, and toolchain smoke tests require neither. Import test helpers
 explicitly (`import { describe, it } from "vitest"`) — globals are disabled on
 purpose so Jest and Vitest type declarations cannot collide.
+
+**Container reuse.** The integration and e2e projects start Postgres through
+Testcontainers, which calls `withReuse()`. Reuse is **opt-in per machine** and
+cannot be enabled from the repository: Testcontainers only reads
+`~/.testcontainers.properties` or the `TESTCONTAINERS_REUSE_ENABLE` environment
+variable. Without one of them the call is a no-op and every run pays for a fresh
+container. To turn it on locally:
+
+```bash
+echo "testcontainers.reuse.enable=true" >> ~/.testcontainers.properties
+```
+
+Leave it off in CI — a reused container would leak state between workflow runs.
 
 ## Notes for contributors
 

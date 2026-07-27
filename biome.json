@@ -17,9 +17,6 @@
             "preset": "recommended",
             "suspicious": {
                 "noExplicitAny": "error"
-            },
-            "style": {
-                "useImportType": "off"
             }
         }
     },

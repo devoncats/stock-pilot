@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
 
     steps:
@@ -71,9 +70,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      # The installer is pinned to the same tag as the tool it downloads, so a
+      # push to actionlint's default branch cannot change what CI executes.
       - name: actionlint
         run: |
-          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) 1.7.12
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
           ./actionlint -color
 
       - uses: pnpm/action-setup@v6
