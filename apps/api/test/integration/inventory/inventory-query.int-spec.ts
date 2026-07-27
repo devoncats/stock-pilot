@@ -7,17 +7,12 @@ import {
 } from "test/integration/support/fixtures.js";
 import { resetDatabase } from "test/integration/support/reset.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import {
-    type ProductId,
-    productId,
-} from "@/modules/catalog/domain/product-id/product-id.js";
+import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { PrismaInventoryQuery } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-query.prisma.repository.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
-const FIXED_CLOCK = { now: () => new Date("2026-07-22T12:00:00Z") };
-
 const prisma = new PrismaService();
-const query = new PrismaInventoryQuery(prisma, FIXED_CLOCK);
+const query = new PrismaInventoryQuery(prisma);
 
 describe("PrismaInventoryQuery", () => {
     beforeEach(() => resetDatabase(prisma));
@@ -153,7 +148,7 @@ describe("PrismaInventoryQuery", () => {
                 backordered: 1,
             });
 
-            const position = await query.findPosition(product.id as ProductId);
+            const position = await query.findPosition(productId(product.id));
 
             expect(position?.available).toBe(7);
             expect(position?.position).toBe(14);
@@ -171,7 +166,7 @@ describe("PrismaInventoryQuery", () => {
                 reason: "second",
             });
 
-            const page = await query.listMovements(product.id as ProductId, {
+            const page = await query.listMovements(productId(product.id), {
                 offset: 0,
                 limit: 10,
             });
@@ -203,11 +198,84 @@ describe("PrismaInventoryQuery", () => {
             const kpis = await query.inventoryKpis();
 
             expect(kpis.totalSkus).toBe(2);
-            // a: 10 * $10.00 = $100.00; b: 0 * $5.00 = $0.00
             expect(kpis.inventoryValueCents).toBe(10_000);
             expect(kpis.skusOutOfStock).toBe(1);
-            // only `a` has demand history, so the average ignores `b`'s null
-            expect(kpis.averageCoverageWeeks).toBe(1);
+            expect(kpis.averageCoverageWeeks).toBe(6.5);
+        });
+
+        it("reports the anchor as the last week with recorded demand", async () => {
+            const product = await createProduct(prisma);
+            await createInventoryItem(prisma, product.id, { onHand: 10 });
+
+            await createDemandHistory(prisma, product.id, [
+                { week: "2025-12-29", qty: 10 },
+                { week: "2026-01-05", qty: 10 },
+            ]);
+
+            const kpis = await query.inventoryKpis();
+
+            expect(kpis.demandHistoryThroughWeek).toBe("2026-01-05");
+        });
+
+        it("reports a null anchor when there is no demand history", async () => {
+            const product = await createProduct(prisma);
+            await createInventoryItem(prisma, product.id, { onHand: 10 });
+
+            const kpis = await query.inventoryKpis();
+
+            expect(kpis.demandHistoryThroughWeek).toBeNull();
+        });
+    });
+
+    describe("coverage window", () => {
+        it("excludes the week just out of the 13-week window", async () => {
+            const product = await createProduct(prisma);
+            await createInventoryItem(prisma, product.id, { onHand: 100 });
+
+            await createDemandHistory(prisma, product.id, [
+                { week: "2026-01-05", qty: 0 },
+                { week: "2025-10-06", qty: 1000 },
+            ]);
+
+            const position = await query.findPosition(productId(product.id));
+
+            expect(position?.coverageWeeks).toBeNull();
+        });
+
+        it("divides by the window, not by the weeks that have a row", async () => {
+            const product = await createProduct(prisma);
+            await createInventoryItem(prisma, product.id, { onHand: 200 });
+
+            await createDemandHistory(prisma, product.id, [
+                { week: "2026-01-05", qty: 100 },
+                { week: "2025-12-29", qty: 100 },
+            ]);
+
+            const position = await query.findPosition(productId(product.id));
+
+            expect(position?.coverageWeeks).toBe(13);
+        });
+
+        it("reports null for a SKU whose demand history predates the window", async () => {
+            const active = await createProduct(prisma, "ACTIVE");
+            const discontinued = await createProduct(prisma, "DISCONTINUED");
+
+            await createInventoryItem(prisma, active.id, { onHand: 100 });
+            await createInventoryItem(prisma, discontinued.id, { onHand: 100 });
+
+            await createDemandHistory(prisma, active.id, [
+                { week: "2026-01-05", qty: 10 },
+            ]);
+
+            await createDemandHistory(prisma, discontinued.id, [
+                { week: "2025-06-02", qty: 500 },
+            ]);
+
+            const position = await query.findPosition(
+                productId(discontinued.id),
+            );
+
+            expect(position?.coverageWeeks).toBeNull();
         });
     });
 });

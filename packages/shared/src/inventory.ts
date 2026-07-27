@@ -38,4 +38,5 @@ export interface InventoryKpisDto {
     /** `null` when no SKU in the catalogue has demand history. */
     averageCoverageWeeks: number | null;
     skusOutOfStock: number;
+    demandHistoryThroughWeek: string | null;
 }
