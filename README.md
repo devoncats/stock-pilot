@@ -44,7 +44,7 @@ The example environment works as-is for local development — nothing to fill in
 <http://localhost:8080>. Verify the API with:
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8080/api/v1/health
 # {"status":"ok"}
 ```
 
@@ -108,7 +108,7 @@ pnpm smoke:apps             # the above, plus api /health and the web root
 | `pnpm compose:logs` | Tails logs for every service |
 | `pnpm compose:config` | Validates the Compose file |
 | `pnpm smoke:infrastructure` | Checks Postgres and Redis are answering |
-| `pnpm smoke:apps` | Same, plus the API `/health` and the web root |
+| `pnpm smoke:apps` | Same, plus the API `/api/v1/health` and the web root |
 
 `pnpm check` and `pnpm test` are the local quality gates. They compose the two
 lanes — Node and Python — and CI calls the lane scripts directly rather than

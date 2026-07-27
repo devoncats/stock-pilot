@@ -100,14 +100,14 @@ const appChecks: Check[] = [
         name: "api",
         run: async () => {
             const response = await httpGet(
-                `http://localhost:${apiPort}/health`,
+                `http://localhost:${apiPort}/api/v1/health`,
             );
 
             let body: unknown;
             try {
                 body = await response.json();
             } catch {
-                throw new Error("/health did not return valid JSON");
+                throw new Error("/api/v1/health did not return valid JSON");
             }
 
             if (
@@ -117,7 +117,7 @@ const appChecks: Check[] = [
                 body.status !== "ok"
             ) {
                 throw new Error(
-                    `/health returned ${JSON.stringify(body)}, expected {"status":"ok"}`,
+                    `/api/v1/health returned ${JSON.stringify(body)}, expected {"status":"ok"}`,
                 );
             }
         },
