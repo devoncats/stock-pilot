@@ -29,15 +29,16 @@ explicitly.
 ## Layout
 
 ```
-src/stock_pilot_machine_learning/   package source
-tests/                              pytest suite
-pyproject.toml                      dependencies, ruff and pytest configuration
+src/stock_pilot_ml/   package source — M5 aggregation and its CLI
+tests/                pytest suite and M5 fixtures
+pyproject.toml        dependencies, ruff and pytest configuration
 ```
 
 ## Planned scope
 
-Currently a skeleton: only the toolchain is wired. Real functionality lands in
-Phase 2:
+So far this service only prepares data: `stock_pilot_ml.cli` aggregates the raw
+M5 dataset into the weekly demand file the seed consumes (F0-04). Forecasting
+lands in Phase 2:
 
 - **Prefect pipeline** — `ingest → features → train → evaluate → publish`
 - **Baselines** (naive, moving average, ETS/Holt-Winters, Croston for intermittent

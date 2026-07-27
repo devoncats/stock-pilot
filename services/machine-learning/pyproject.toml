@@ -1,7 +1,7 @@
 [project]
 name = "stock-pilot-ml"
 version = "0.1.0"
-description = "Add your description here"
+description = "Demand forecasting and dataset preparation for StockPilot"
 readme = "README.md"
 authors = [
     { name = "devoncats", email = "devoncats.dev@outlook.com" }
