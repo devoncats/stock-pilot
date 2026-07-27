@@ -10,9 +10,9 @@ import type { StockMovementModel } from "@/generated/prisma/models.js";
 import { type ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { ListMovementsQueryDto } from "@/modules/inventory/adapter/http/dto/list-movements-query.dto.js";
 import { ListPositionsQueryDto } from "@/modules/inventory/adapter/http/dto/list-positions-query.dto.js";
-import type { InventoryItemWithProduct } from "@/modules/inventory/adapter/persistence/inventory-position.mapper.js";
-import { InventoryPositionMapper } from "@/modules/inventory/adapter/persistence/inventory-position.mapper.js";
-import { StockMovementViewMapper } from "@/modules/inventory/adapter/persistence/stock-movement-view.mapper.js";
+import type { InventoryItemWithProduct } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-position.mapper.js";
+import { InventoryPositionMapper } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-position.mapper.js";
+import { StockMovementViewMapper } from "@/modules/inventory/adapter/persistence/stock-movement/stock-movement-view.mapper.js";
 import type { InventoryQuery } from "@/modules/inventory/application/queries/ports/inventory-query.repository.js";
 import {
     averageCoverageWeeks,

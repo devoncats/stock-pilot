@@ -11,7 +11,7 @@ import {
     type ProductId,
     productId,
 } from "@/modules/catalog/domain/product-id/product-id.js";
-import { PrismaInventoryQuery } from "@/modules/inventory/adapter/persistence/inventory-query.prisma.repository.js";
+import { PrismaInventoryQuery } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-query.prisma.repository.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 const FIXED_CLOCK = { now: () => new Date("2026-07-22T12:00:00Z") };
