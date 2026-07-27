@@ -1,5 +1,9 @@
 import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { derivePosition } from "@/modules/inventory/domain/derive-position/derive-position.js";
+import { InsufficientStockError } from "@/modules/inventory/domain/errors/insufficient-stock/insufficient-stock.error.js";
+import { InvalidMovementError } from "@/modules/inventory/domain/errors/invalid-movement/invalid-movement.error.js";
+import { Quantity } from "@/modules/inventory/domain/quantity/quantity.js";
+import { StockMovement } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
 
 export interface InventoryItemProps {
@@ -8,6 +12,14 @@ export interface InventoryItemProps {
     reserved: number;
     onOrder: number;
     backordered: number;
+}
+
+export interface InventoryItemState {
+    productId: ProductId;
+    onHand: Quantity;
+    reserved: Quantity;
+    onOrder: Quantity;
+    backordered: Quantity;
 }
 
 export class InventoryItem {
@@ -26,37 +38,51 @@ export class InventoryItem {
             );
         }
 
-        if (props.reserved > props.onHand) {
+        const state: InventoryItemState = {
+            productId: props.productId,
+            onHand: Quantity.create(props.onHand),
+            reserved: Quantity.create(props.reserved),
+            onOrder: Quantity.create(props.onOrder),
+            backordered: Quantity.create(props.backordered),
+        };
+
+        if (state.reserved.value > state.onHand.value) {
             throw new InvalidValueError(
                 "[InventoryItem]: Reserved quantity cannot exceed on-hand quantity",
             );
         }
 
-        if (props.onHand < 0) {
-            throw new InvalidValueError(
-                "[InventoryItem]: On-hand quantity cannot be negative",
-            );
-        }
-
-        if (props.reserved < 0) {
-            throw new Error(
-                "[InventoryItem]: Reserved quantity cannot be negative",
-            );
-        }
-
-        if (props.onOrder < 0) {
-            throw new Error(
-                "[InventoryItem]: On-order quantity cannot be negative",
-            );
-        }
-
-        if (props.backordered < 0) {
-            throw new Error(
-                "[InventoryItem]: Backordered quantity cannot be negative",
-            );
-        }
-
         return new InventoryItem(props);
+    }
+
+    applyMovement(movement: StockMovement): InventoryItem {
+        if (movement.productId !== this.props.productId) {
+            throw new InvalidMovementError(
+                "[InventoryItem]: Movement product ID does not match inventory item product ID",
+            );
+        }
+
+        const nextOnHand = this.props.onHand + movement.qty;
+
+        if (nextOnHand < 0) {
+            throw new InsufficientStockError(
+                `[InventoryItem]: A movement of ${movement.qty} would leave on-hand at ${nextOnHand}`,
+            );
+        }
+
+        if (nextOnHand < this.props.reserved) {
+            throw new InsufficientStockError(
+                `[InventoryItem]: A movement of ${movement.qty} would leave ${this.reserved} reserved against ${nextOnHand} on hand`,
+            );
+        }
+
+        return InventoryItem.create({
+            productId: this.props.productId,
+            onHand: nextOnHand,
+            reserved: this.props.reserved,
+            onOrder: this.props.onOrder,
+            backordered: this.props.backordered,
+        });
     }
 
     get productId(): ProductId {
