@@ -5,7 +5,7 @@ import type {
     PageParams,
     StockMovementDto,
 } from "@stock-pilot/shared";
-import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
+import type { ProductId } from "@/shared/domain/product-id/product-id.js";
 
 export const SORT_VALUES = ["sku", "onHand", "value"] as const;
 export type SortValue = (typeof SORT_VALUES)[number];

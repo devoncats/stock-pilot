@@ -5,9 +5,9 @@ import {
     Product,
     type ProductProps,
 } from "@/modules/catalog/domain/product/product.js";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { Sku } from "@/modules/catalog/domain/sku/sku.js";
 import { Money } from "@/shared/domain/money/money.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 
 const row = (
     overrides: Partial<Prisma.ProductModel> = {},

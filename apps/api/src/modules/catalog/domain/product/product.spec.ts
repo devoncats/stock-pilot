@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Money } from "@/shared/domain/money/money.js";
-import { productId } from "../product-id/product-id.js";
+import { productId } from "../../../../shared/domain/product-id/product-id.js";
 import { Sku } from "../sku/sku.js";
 import { Product } from "./product.js";
 

@@ -7,7 +7,6 @@ import type {
 } from "@stock-pilot/shared";
 import { Prisma } from "@/generated/prisma/client.js";
 import type { StockMovementModel } from "@/generated/prisma/models.js";
-import { type ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import type { InventoryItemWithProduct } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-position.mapper.js";
 import { InventoryPositionMapper } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-position.mapper.js";
 import { StockMovementViewMapper } from "@/modules/inventory/adapter/persistence/stock-movement/stock-movement-view.mapper.js";
@@ -26,6 +25,7 @@ import {
     skusOutOfStock,
 } from "@/modules/inventory/domain/kpis/aggregate-kpis.js";
 import { calculateInventoryValue } from "@/modules/inventory/domain/value/calculate-inventory-value.js";
+import { type ProductId } from "@/shared/domain/product-id/product-id.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 interface CoverageWindow {

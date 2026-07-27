@@ -1,9 +1,9 @@
 import { MovementType } from "@stock-pilot/shared";
-import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { InvalidMovementError } from "@/modules/inventory/domain/errors/invalid-movement/invalid-movement.error.js";
 import { IsoWeek } from "@/modules/inventory/domain/iso-week/iso-week.js";
 import { MovementReference } from "@/modules/inventory/domain/movement-reference/movement-reference.js";
 import type { StockMovementId } from "@/modules/inventory/domain/stock-movement-id/stock-movement-id.js";
+import type { ProductId } from "@/shared/domain/product-id/product-id.js";
 
 export interface StockMovementProps {
     id: StockMovementId;

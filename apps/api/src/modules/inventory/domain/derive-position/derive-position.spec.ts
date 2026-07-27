@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { InventoryItem } from "@/modules/inventory/domain/inventory-item/inventory-item.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 import { derivePosition } from "./derive-position.js";
 
 describe("derivePosition", () => {

@@ -4,9 +4,9 @@ import {
 } from "test/integration/support/fixtures.js";
 import { resetDatabase } from "test/integration/support/reset.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { PrismaInventoryItemRepository } from "@/modules/inventory/adapter/persistence/inventory-item/inventory-item.prisma.repository.js";
 import { InventoryItem } from "@/modules/inventory/domain/inventory-item/inventory-item.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 import { PrismaTransactionManager } from "@/shared/prisma-transaction.manager.js";
 import { TransactionContext } from "@/shared/transaction-context.js";

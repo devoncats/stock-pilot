@@ -1,6 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { MovementType, ReferenceType } from "@stock-pilot/shared";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import {
     INVENTORY_ITEM_REPOSITORY,
     type InventoryItemRepository,
@@ -22,6 +21,7 @@ import {
     TRANSACTION_MANAGER,
     type TransactionManager,
 } from "@/shared/application/ports/transaction-manager.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 
 export type RecordStockMovementInput = {
     productId: string;

@@ -1,6 +1,5 @@
 import { MovementType, ReferenceType } from "@stock-pilot/shared";
 import { describe, expect, it, vi } from "vitest";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import {
     RecordStockMovement,
     type RecordStockMovementInput,
@@ -13,6 +12,7 @@ import {
     type InventoryItemProps,
 } from "@/modules/inventory/domain/inventory-item/inventory-item.js";
 import type { StockMovement } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 
 const PRODUCT_ID = "0192f8a0-0000-7000-8000-000000000000";
 const MOVEMENT_ID = "0192f8a0-0000-7000-8000-000000000010";

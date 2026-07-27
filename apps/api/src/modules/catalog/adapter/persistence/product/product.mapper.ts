@@ -3,9 +3,9 @@ import type {
     ProductUncheckedCreateInput,
 } from "@/generated/prisma/models.js";
 import { Product } from "@/modules/catalog/domain/product/product.js";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { Sku } from "@/modules/catalog/domain/sku/sku.js";
 import { Money } from "@/shared/domain/money/money.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 
 export const ProductMapper = {
     toDomain(row: ProductModel): Product {

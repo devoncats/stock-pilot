@@ -1,9 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { InventoryItemMapper } from "@/modules/inventory/adapter/persistence/inventory-item/inventory-item.mapper.js";
 import type { InventoryItemRepository } from "@/modules/inventory/application/commands/ports/inventory-item.repository.js";
 import type { InventoryItem } from "@/modules/inventory/domain/inventory-item/inventory-item.js";
 import { CLOCK, type Clock } from "@/shared/application/ports/clock.js";
+import type { ProductId } from "@/shared/domain/product-id/product-id.js";
 import { TransactionContext } from "@/shared/transaction-context.js";
 
 @Injectable()

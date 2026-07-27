@@ -1,9 +1,9 @@
 import { Prisma } from "@/generated/prisma/client.js";
 import type { StockMovementModel } from "@/generated/prisma/models.js";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { MovementReference } from "@/modules/inventory/domain/movement-reference/movement-reference.js";
 import { StockMovement } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 import { stockMovementId } from "@/modules/inventory/domain/stock-movement-id/stock-movement-id.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 export const StockMovementMapper = {
     toPersistence(
         stockMovement: StockMovement,

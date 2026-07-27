@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import type { Page } from "@stock-pilot/shared";
-import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { StockMovementMapper } from "@/modules/inventory/adapter/persistence/stock-movement/stock-movement.mapper.js";
 import type {
     ListByProductQueryParams,
     StockMovementRepository,
 } from "@/modules/inventory/application/commands/ports/stock-movement.repository.js";
 import type { StockMovement } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
+import type { ProductId } from "@/shared/domain/product-id/product-id.js";
 import { TransactionContext } from "@/shared/transaction-context.js";
 
 @Injectable()

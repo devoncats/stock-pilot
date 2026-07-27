@@ -6,8 +6,8 @@ import type {
     ProductRepository,
 } from "@/modules/catalog/application/ports/product.repository.js";
 import { Product } from "@/modules/catalog/domain/product/product.js";
-import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { Sku } from "@/modules/catalog/domain/sku/sku.js";
+import type { ProductId } from "@/shared/domain/product-id/product-id.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 @Injectable()

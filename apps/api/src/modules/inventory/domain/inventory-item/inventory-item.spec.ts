@@ -1,6 +1,5 @@
 import { MovementType } from "@stock-pilot/shared";
 import { describe, expect, it } from "vitest";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { InsufficientStockError } from "@/modules/inventory/domain/errors/insufficient-stock/insufficient-stock.error.js";
 import { InvalidMovementError } from "@/modules/inventory/domain/errors/invalid-movement/invalid-movement.error.js";
 import { MovementReference } from "@/modules/inventory/domain/movement-reference/movement-reference.js";
@@ -10,6 +9,7 @@ import {
 } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 import { stockMovementId } from "@/modules/inventory/domain/stock-movement-id/stock-movement-id.js";
 import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 import { InventoryItem, type InventoryItemProps } from "./inventory-item.js";
 
 const baseInventoryItemProps = (
