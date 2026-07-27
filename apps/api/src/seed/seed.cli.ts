@@ -2,8 +2,28 @@ import { existsSync } from "node:fs";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 import { runSeed } from "./seed.js";
 
-const num = (value: string | undefined, fallback: number): number =>
-    value === undefined ? fallback : Number(value);
+/**
+ * `Number("abc")` is `NaN`, and `Array.from({ length: NaN })` is an empty array
+ * — a typo in an env var would silently seed nothing instead of failing.
+ */
+const num = (
+    name: string,
+    value: string | undefined,
+    fallback: number,
+    min: number,
+): number => {
+    if (value === undefined) {
+        return fallback;
+    }
+
+    const parsed = Number(value);
+
+    if (!Number.isInteger(parsed) || parsed < min) {
+        throw new Error(`${name} must be an integer >= ${min}, got "${value}"`);
+    }
+
+    return parsed;
+};
 
 async function main(): Promise<void> {
     const path =
@@ -31,10 +51,15 @@ async function main(): Promise<void> {
     try {
         const summary = await runSeed(prisma, {
             path,
-            count: num(process.env.SEED_SYNTH_COUNT, 50),
-            seed: num(process.env.SEED_RANDOM_SEED, 42),
+            count: num("SEED_SYNTH_COUNT", process.env.SEED_SYNTH_COUNT, 50, 0),
+            seed: num("SEED_RANDOM_SEED", process.env.SEED_RANDOM_SEED, 42, 0),
             startWeek: process.env.SEED_START_WEEK ?? "2011-01-24",
-            weeks: num(process.env.SEED_SYNTHETIC_WEEKS, 273),
+            weeks: num(
+                "SEED_SYNTHETIC_WEEKS",
+                process.env.SEED_SYNTHETIC_WEEKS,
+                273,
+                1,
+            ),
         });
 
         console.log(

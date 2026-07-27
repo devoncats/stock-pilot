@@ -39,6 +39,10 @@ export interface SeedSummary {
 function asDate(week: string): Date {
     const date = new Date(`${week}T00:00:00Z`);
 
+    if (Number.isNaN(date.getTime())) {
+        throw new Error(`[seed] Invalid week date: ${week}`);
+    }
+
     return date;
 }
 
@@ -107,7 +111,7 @@ async function upsertSupplierPool(prisma: PrismaService): Promise<string[]> {
             where: { id },
             create: {
                 id,
-                name: `Supplier ${index + 1}`.padStart(2, "0"),
+                name: `Supplier ${String(index + 1).padStart(2, "0")}`,
                 orderingCost: "50.00",
             },
             update: {},
@@ -188,6 +192,17 @@ async function seedInitialStock(
 
     if (movements > 0) return;
 
+    // The receipt is dated on the SKU's first demand week, so a product with no
+    // weeks has nothing to date it with. Fail with a seed error rather than
+    // letting `new Date(undefined)` reach Prisma as an Invalid Date.
+    const firstWeek = item.weeklyDemand[0]?.week;
+
+    if (!firstWeek) {
+        throw new Error(
+            `[seed] ${item.sku} has no demand weeks; cannot date its initial stock`,
+        );
+    }
+
     const total = item.weeklyDemand.reduce((sum, w) => sum + w.qty, 0);
 
     const average = total / Math.max(1, item.weeklyDemand.length);
@@ -201,7 +216,7 @@ async function seedInitialStock(
                 productId,
                 type: "RECEIPT",
                 signedQty: qty,
-                week: asDate(item.weeklyDemand[0]?.week as string),
+                week: asDate(firstWeek),
                 referenceType: "MANUAL",
                 reason: "Initial seed stock",
             },
@@ -263,14 +278,14 @@ export async function runSeed(
 ): Promise<SeedSummary> {
     const m5 = readWeeklyDemand(options.path);
 
-    const syntetic: SeedProduct[] = generateSyntheticSkus({
+    const synthetic: SeedProduct[] = generateSyntheticSkus({
         seed: options.seed,
         count: options.count,
         weeks: options.weeks ?? 52,
         startWeek: options.startWeek,
     });
 
-    const items = [...m5, ...syntetic];
+    const items = [...m5, ...synthetic];
     const suppliersIds = await upsertSupplierPool(prisma);
 
     for (const [index, item] of items.entries()) {
