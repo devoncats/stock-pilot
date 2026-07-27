@@ -1,4 +1,4 @@
-import { MovementType } from "@/generated/prisma/enums.js";
+import { MovementType } from "@stock-pilot/shared";
 import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { InvalidMovementError } from "@/modules/inventory/domain/errors/invalid-movement/invalid-movement.error.js";
 import { IsoWeek } from "@/modules/inventory/domain/iso-week/iso-week.js";

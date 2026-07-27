@@ -1,7 +1,7 @@
 import type { Page } from "@stock-pilot/shared";
-import type { StockMovement } from "@/generated/prisma/client.js";
 import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { ListByProductQueryDto } from "@/modules/inventory/adapter/http/dto/list-by-product-query.dto.js";
+import type { StockMovement } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 
 export interface StockMovementRepository {
     append(movement: StockMovement): Promise<void>;
