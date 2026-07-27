@@ -1,5 +1,5 @@
+import { ReferenceType } from "@stock-pilot/shared";
 import { describe, expect, it } from "vitest";
-import { ReferenceType } from "@/generated/prisma/enums.js";
 import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
 import { MovementReference } from "./movement-reference.js";
 

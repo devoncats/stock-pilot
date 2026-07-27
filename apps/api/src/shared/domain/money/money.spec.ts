@@ -36,4 +36,8 @@ describe("Money", () => {
         ).toBe(true);
         expect(Money.fromCents(1999).equals(Money.fromCents(2000))).toBe(false);
     });
+
+    it("rejects a string that is not a decimal", () => {
+        expect(() => Money.fromDecimalString("abc")).toThrow();
+    });
 });

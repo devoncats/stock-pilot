@@ -16,6 +16,7 @@ import type { StockMovement } from "@/modules/inventory/domain/stock-movement/st
 
 const PRODUCT_ID = "0192f8a0-0000-7000-8000-000000000000";
 const MOVEMENT_ID = "0192f8a0-0000-7000-8000-000000000010";
+const PO_ID = "0192f8a0-0000-7000-8000-000000000002";
 const NOW = new Date("2026-07-22T12:00:00Z");
 
 const itemWith = (overrides: Partial<InventoryItemProps> = {}): InventoryItem =>
@@ -184,5 +185,22 @@ describe("RecordStockMovement", () => {
         expect(movement.id).toBe(MOVEMENT_ID);
         expect(movement.occurredAt.toISOString()).toBe(NOW.toISOString());
         expect(movement.week.toString()).toBe("2026-07-20");
+    });
+
+    it("records a receipt with a purchase order reference and no reason", async () => {
+        const { useCase, appendedMovement } = harness();
+
+        await useCase.execute({
+            productId: PRODUCT_ID,
+            type: MovementType.RECEIPT,
+            qty: 10,
+            reference: { type: ReferenceType.PURCHASE_ORDER, id: PO_ID },
+        });
+
+        const movement = appendedMovement();
+
+        expect(movement.type).toBe(MovementType.RECEIPT);
+        expect(movement.reason).toBeNull();
+        expect(movement.reference.id).toBe(PO_ID);
     });
 });

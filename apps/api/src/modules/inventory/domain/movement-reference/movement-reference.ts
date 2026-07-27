@@ -1,4 +1,4 @@
-import { ReferenceType } from "@/generated/prisma/enums.js";
+import { ReferenceType } from "@stock-pilot/shared";
 import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
 
 export class MovementReference {

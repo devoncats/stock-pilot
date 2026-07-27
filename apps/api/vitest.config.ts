@@ -20,6 +20,36 @@ export default defineConfig({
         }),
     ],
     test: {
+        coverage: {
+            provider: "v8",
+            include: ["src/**/*.ts"],
+            exclude: [
+                "src/generated/**",
+                "**/ports/**",
+                "**/*.module.ts",
+                "**/*.dto.ts",
+                "src/main.ts",
+                "src/app.setup.ts",
+            ],
+            thresholds: {
+                perFile: true,
+                "src/modules/**/domain/**": {
+                    lines: 95,
+                    functions: 95,
+                    branches: 95,
+                },
+                "src/modules/**/application/**": {
+                    lines: 95,
+                    functions: 95,
+                    branches: 95,
+                },
+                "src/shared/domain/**": {
+                    lines: 95,
+                    functions: 95,
+                    branches: 95,
+                },
+            },
+        },
         projects: [
             {
                 extends: true,

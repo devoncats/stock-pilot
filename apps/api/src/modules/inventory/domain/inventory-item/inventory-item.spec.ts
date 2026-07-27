@@ -167,6 +167,8 @@ describe("InventoryItem", () => {
 
             expect(updatedItem.available).toBe(11);
             expect(updatedItem.position).toBe(17);
+            expect(updatedItem.onOrder).toBe(5);
+            expect(updatedItem.backordered).toBe(2);
         });
 
         it("returns a new instance and leaves the original unchanged", () => {

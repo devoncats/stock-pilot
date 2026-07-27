@@ -40,6 +40,10 @@ describe("Product", () => {
     });
 
     it("rejects an empty name", () => {
+        expect(() => Product.create({ ...validProps(), name: "" })).toThrow();
+    });
+
+    it("rejects a name with only whitespace", () => {
         expect(() =>
             Product.create({ ...validProps(), name: "   " }),
         ).toThrow();
