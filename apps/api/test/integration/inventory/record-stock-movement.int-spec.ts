@@ -54,7 +54,6 @@ describe("RecordStockMovement (integration)", () => {
         await createInventoryItem(prisma, product.id, { onHand: 10 });
 
         const failingItems: InventoryItemRepository = {
-            findByProductId: (id) => items.findByProductId(id),
             findByProductIdForUpdate: (id) =>
                 items.findByProductIdForUpdate(id),
             save: () => Promise.reject(new Error("boom")),

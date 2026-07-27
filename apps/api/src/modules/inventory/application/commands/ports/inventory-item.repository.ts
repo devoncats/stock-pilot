@@ -2,7 +2,6 @@ import type { InventoryItem } from "@/modules/inventory/domain/inventory-item/in
 import type { ProductId } from "@/shared/domain/product-id/product-id.js";
 
 export interface InventoryItemRepository {
-    findByProductId(productId: ProductId): Promise<InventoryItem | null>;
     findByProductIdForUpdate(
         productId: ProductId,
     ): Promise<InventoryItem | null>;
