@@ -1,7 +1,7 @@
 import { Prisma } from "@/generated/prisma/client.js";
 import type { InventoryItemModel } from "@/generated/prisma/models.js";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { InventoryItem } from "@/modules/inventory/domain/inventory-item/inventory-item.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 
 export const InventoryItemMapper = {
     toPersistence(

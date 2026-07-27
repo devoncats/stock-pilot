@@ -1,5 +1,5 @@
-import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import type { InventoryItem } from "@/modules/inventory/domain/inventory-item/inventory-item.js";
+import type { ProductId } from "@/shared/domain/product-id/product-id.js";
 
 export interface InventoryItemRepository {
     findByProductId(productId: ProductId): Promise<InventoryItem | null>;

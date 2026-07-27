@@ -7,8 +7,8 @@ import {
 } from "test/integration/support/fixtures.js";
 import { resetDatabase } from "test/integration/support/reset.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { PrismaInventoryQuery } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-query.prisma.repository.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 const prisma = new PrismaService();

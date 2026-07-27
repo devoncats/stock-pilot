@@ -1,4 +1,3 @@
-import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import {
     derivePosition,
     type PositionInputs,
@@ -8,6 +7,7 @@ import { InvalidMovementError } from "@/modules/inventory/domain/errors/invalid-
 import { Quantity } from "@/modules/inventory/domain/quantity/quantity.js";
 import { StockMovement } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
+import type { ProductId } from "@/shared/domain/product-id/product-id.js";
 
 export interface InventoryItemProps extends PositionInputs {
     productId: ProductId;

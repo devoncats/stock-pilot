@@ -1,6 +1,5 @@
 import { MovementType } from "@stock-pilot/shared";
 import { describe, expect, it } from "vitest";
-import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { InvalidMovementError } from "@/modules/inventory/domain/errors/invalid-movement/invalid-movement.error.js";
 import { MovementReference } from "@/modules/inventory/domain/movement-reference/movement-reference.js";
 import {
@@ -8,6 +7,7 @@ import {
     type StockMovementProps,
 } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 import { stockMovementId } from "@/modules/inventory/domain/stock-movement-id/stock-movement-id.js";
+import { productId } from "@/shared/domain/product-id/product-id.js";
 
 const MOVEMENT_ID = stockMovementId("0192f8a0-0000-7000-8000-000000000010");
 const PRODUCT_ID = productId("0192f8a0-0000-7000-8000-000000000000");

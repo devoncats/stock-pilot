@@ -3,10 +3,6 @@ import { MovementType } from "@stock-pilot/shared";
 import { createProduct } from "test/integration/support/fixtures.js";
 import { resetDatabase } from "test/integration/support/reset.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import {
-    type ProductId,
-    productId,
-} from "@/modules/catalog/domain/product-id/product-id.js";
 import { PrismaStockMovementRepository } from "@/modules/inventory/adapter/persistence/stock-movement/stock-movement.prisma.repository.js";
 import { MovementReference } from "@/modules/inventory/domain/movement-reference/movement-reference.js";
 import {
@@ -14,6 +10,10 @@ import {
     type StockMovementProps,
 } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 import { stockMovementId } from "@/modules/inventory/domain/stock-movement-id/stock-movement-id.js";
+import {
+    type ProductId,
+    productId,
+} from "@/shared/domain/product-id/product-id.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 import { TransactionContext } from "@/shared/transaction-context.js";
 
