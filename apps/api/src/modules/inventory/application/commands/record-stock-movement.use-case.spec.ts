@@ -59,8 +59,11 @@ function harness(existing: InventoryItem | null = itemWith({ onHand: 10 })) {
     const seen: Record<string, boolean> = {};
 
     const items = {
-        findByProductId: vi.fn(),
-        findByProductIdForUpdate: vi.fn(async () => existing),
+        findByProductIdForUpdate: vi.fn(async () => {
+            seen.read = transactions.active;
+
+            return existing;
+        }),
         save: vi.fn(async () => {
             seen.save = transactions.active;
         }),
@@ -70,8 +73,6 @@ function harness(existing: InventoryItem | null = itemWith({ onHand: 10 })) {
         append: vi.fn(async (_movement: StockMovement) => {
             seen.append = transactions.active;
         }),
-        listByProduct: vi.fn(),
-        sumQtyByProduct: vi.fn(),
     };
 
     const useCase = new RecordStockMovement(
@@ -101,14 +102,16 @@ function harness(existing: InventoryItem | null = itemWith({ onHand: 10 })) {
 }
 
 describe("RecordStockMovement", () => {
-    it("appends the movement and saves the item, both inside the transaction", async () => {
+    it("reads, appends and saves inside the transaction", async () => {
         const { useCase, items, movements, seen } = harness();
 
         await useCase.execute(adjustment({ qty: -3 }));
 
+        expect(items.findByProductIdForUpdate).toHaveBeenCalledOnce();
         expect(movements.append).toHaveBeenCalledOnce();
         expect(items.save).toHaveBeenCalledOnce();
-        expect(seen).toEqual({ append: true, save: true });
+
+        expect(seen).toEqual({ read: true, append: true, save: true });
     });
 
     it("returns the id and the recomputed position", async () => {
@@ -122,24 +125,16 @@ describe("RecordStockMovement", () => {
         });
     });
 
-    it("stamps the movement with the injected clock and id", async () => {
+    it("stamps the movement with the injected clock, id and derived week", async () => {
         const { useCase, appendedMovement } = harness();
 
-        await useCase.execute(adjustment({ qty: -3 }));
+        await useCase.execute(adjustment());
 
         const movement = appendedMovement();
 
         expect(movement.id).toBe(MOVEMENT_ID);
-        expect(movement.occurredAt.toISOString()).toEqual(NOW.toISOString());
-    });
-
-    it("reads the item with the locking query, never the plain one", async () => {
-        const { useCase, items } = harness();
-
-        await useCase.execute(adjustment({ qty: -3 }));
-
-        expect(items.findByProductIdForUpdate).toHaveBeenCalledOnce();
-        expect(items.findByProductId).not.toHaveBeenCalled();
+        expect(movement.occurredAt.toISOString()).toBe(NOW.toISOString());
+        expect(movement.week.toString()).toBe("2026-07-20");
     });
 
     it("fails when the product has no inventory item, persisting nothing", async () => {
@@ -173,18 +168,6 @@ describe("RecordStockMovement", () => {
 
         expect(transactions.calls).toBe(0);
         expect(items.findByProductIdForUpdate).not.toHaveBeenCalled();
-    });
-
-    it("stamps the movement with the injected clock and id", async () => {
-        const { useCase, appendedMovement } = harness();
-
-        await useCase.execute(adjustment());
-
-        const movement = appendedMovement();
-
-        expect(movement.id).toBe(MOVEMENT_ID);
-        expect(movement.occurredAt.toISOString()).toBe(NOW.toISOString());
-        expect(movement.week.toString()).toBe("2026-07-20");
     });
 
     it("records a receipt with a purchase order reference and no reason", async () => {

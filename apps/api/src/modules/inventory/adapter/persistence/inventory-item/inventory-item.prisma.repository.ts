@@ -13,14 +13,6 @@ export class PrismaInventoryItemRepository implements InventoryItemRepository {
         @Inject(CLOCK) private readonly clock: Clock,
     ) {}
 
-    async findByProductId(productId: ProductId): Promise<InventoryItem | null> {
-        const row = await this.context.getClient().inventoryItem.findUnique({
-            where: { productId },
-        });
-
-        return row ? InventoryItemMapper.toDomain(row) : null;
-    }
-
     async findByProductIdForUpdate(
         productId: ProductId,
     ): Promise<InventoryItem | null> {
