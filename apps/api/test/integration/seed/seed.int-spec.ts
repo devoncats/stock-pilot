@@ -1,10 +1,3 @@
-/*
-is idempotent: a second run creates no duplicates — corre 2×, compara conteos de las 5 tablas.
-on_hand reconciles with the ledger — por SKU, on_hand === Σ signed_qty.
-every product has at least one supplier and exactly one primary.
-demand_history has no negatives, Mondays only, unique (product, week).
-*/
-
 import { resetDatabase } from "test/integration/support/reset.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { runSeed, type SeedOptions } from "@/seed/seed.js";

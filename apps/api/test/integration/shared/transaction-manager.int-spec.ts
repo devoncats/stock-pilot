@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { resetDatabase } from "test/integration/support/reset.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import type { Prisma } from "@/generated/prisma/browser.js";
+import type { Prisma } from "@/generated/prisma/client.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 import { PrismaTransactionManager } from "@/shared/prisma-transaction.manager.js";
 import { TransactionContext } from "@/shared/transaction-context.js";
