@@ -1,4 +1,4 @@
-import {
+import type {
     ProductModel,
     ProductUncheckedCreateInput,
 } from "@/generated/prisma/models.js";

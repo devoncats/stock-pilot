@@ -1,14 +1,14 @@
 import { Controller, Get, Inject } from "@nestjs/common";
 import type { InventoryKpisDto } from "@stock-pilot/shared";
 import {
-    INVENTORY_QUERY,
-    InventoryQuery,
-} from "@/modules/inventory/application/ports/inventory-query.js";
+    INVENTORY_QUERY_REPOSITORY,
+    type InventoryQuery,
+} from "@/modules/inventory/application/queries/ports/inventory-query.repository.js";
 
-@Controller("api/v1/kpis")
+@Controller("kpis")
 export class KpisController {
     constructor(
-        @Inject(INVENTORY_QUERY)
+        @Inject(INVENTORY_QUERY_REPOSITORY)
         private readonly inventoryQuery: InventoryQuery,
     ) {}
 

@@ -1,12 +1,11 @@
 import { Type } from "class-transformer";
 import { IsIn, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
-import type {
-    ListPositionsSort,
-    SortDirection,
-} from "@/modules/inventory/application/ports/inventory-query.js";
-
-const SORT_VALUES: ListPositionsSort[] = ["sku", "onHand", "value"];
-const DIR_VALUES: SortDirection[] = ["asc", "desc"];
+import {
+    DIR_VALUES,
+    type DirValue,
+    SORT_VALUES,
+    type SortValue,
+} from "@/modules/inventory/application/queries/ports/inventory-query.repository.js";
 
 export class ListPositionsQueryDto {
     @IsOptional()
@@ -16,8 +15,8 @@ export class ListPositionsQueryDto {
     @IsOptional()
     @Type(() => Number)
     @IsInt()
-    @Min(1)
-    page: number = 1;
+    @Min(0)
+    offset: number = 0;
 
     @IsOptional()
     @Type(() => Number)
@@ -28,9 +27,9 @@ export class ListPositionsQueryDto {
 
     @IsOptional()
     @IsIn(SORT_VALUES)
-    sort?: ListPositionsSort;
+    sort?: SortValue;
 
     @IsOptional()
     @IsIn(DIR_VALUES)
-    dir?: SortDirection;
+    dir?: DirValue;
 }

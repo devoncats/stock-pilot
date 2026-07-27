@@ -7,14 +7,21 @@ import {
 } from "test/integration/support/fixtures.js";
 import { resetDatabase } from "test/integration/support/reset.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { PrismaInventoryQuery } from "@/modules/inventory/adapter/persistence/inventory-query.prisma.adapter.js";
+import {
+    type ProductId,
+    productId,
+} from "@/modules/catalog/domain/product-id/product-id.js";
+import { PrismaInventoryQuery } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-query.prisma.repository.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
+const FIXED_CLOCK = { now: () => new Date("2026-07-22T12:00:00Z") };
+
 const prisma = new PrismaService();
-const query = new PrismaInventoryQuery(prisma);
+const query = new PrismaInventoryQuery(prisma, FIXED_CLOCK);
 
 describe("PrismaInventoryQuery", () => {
     beforeEach(() => resetDatabase(prisma));
+
     afterAll(() => prisma.$disconnect());
 
     describe("listPositions", () => {
@@ -26,11 +33,11 @@ describe("PrismaInventoryQuery", () => {
             await createInventoryItem(prisma, b.id, { onHand: 2 });
             await createInventoryItem(prisma, c.id, { onHand: 3 });
 
-            const page = await query.listPositions({ page: 1, limit: 2 });
+            const page = await query.listPositions({ offset: 1, limit: 2 });
 
             expect(page.data).toHaveLength(2);
             expect(page.total).toBe(3);
-            expect(page.page).toBe(1);
+            expect(page.offset).toBe(1);
             expect(page.limit).toBe(2);
         });
 
@@ -45,17 +52,19 @@ describe("PrismaInventoryQuery", () => {
                     holdingCostRate: "0.25",
                 },
             });
+
             const other = await createProduct(prisma, "ZZZ-9");
             await createInventoryItem(prisma, match.id);
             await createInventoryItem(prisma, other.id);
 
             const bySku = await query.listPositions({
-                page: 1,
+                offset: 0,
                 limit: 10,
                 search: "WIDGET-BLUE",
             });
+
             const byName = await query.listPositions({
-                page: 1,
+                offset: 0,
                 limit: 10,
                 search: "blue widget",
             });
@@ -79,7 +88,7 @@ describe("PrismaInventoryQuery", () => {
             await createInventoryItem(prisma, pricey.id, { onHand: 1 });
 
             const bySkuAsc = await query.listPositions({
-                page: 1,
+                offset: 0,
                 limit: 10,
                 sort: "sku",
                 dir: "asc",
@@ -90,7 +99,7 @@ describe("PrismaInventoryQuery", () => {
             ]);
 
             const byOnHandDesc = await query.listPositions({
-                page: 1,
+                offset: 0,
                 limit: 10,
                 sort: "onHand",
                 dir: "desc",
@@ -101,7 +110,7 @@ describe("PrismaInventoryQuery", () => {
             ]);
 
             const byValueDesc = await query.listPositions({
-                page: 1,
+                offset: 0,
                 limit: 10,
                 sort: "value",
                 dir: "desc",
@@ -117,7 +126,7 @@ describe("PrismaInventoryQuery", () => {
             const product = await createProduct(prisma);
             await createInventoryItem(prisma, product.id, { onHand: 10 });
 
-            const page = await query.listPositions({ page: 1, limit: 10 });
+            const page = await query.listPositions({ offset: 0, limit: 10 });
 
             expect(page.data[0]?.coverageWeeks).toBeNull();
         });
@@ -125,7 +134,9 @@ describe("PrismaInventoryQuery", () => {
 
     describe("findPosition", () => {
         it("returns null for an unknown product", async () => {
-            expect(await query.findPosition(randomUUID())).toBeNull();
+            expect(
+                await query.findPosition(productId(randomUUID())),
+            ).toBeNull();
         });
 
         it("derives available/position/valueCents from the same formula as InventoryItem", async () => {
@@ -134,6 +145,7 @@ describe("PrismaInventoryQuery", () => {
                 where: { id: product.id },
                 data: { unitCost: "2.50" },
             });
+
             await createInventoryItem(prisma, product.id, {
                 onHand: 10,
                 reserved: 3,
@@ -141,7 +153,7 @@ describe("PrismaInventoryQuery", () => {
                 backordered: 1,
             });
 
-            const position = await query.findPosition(product.id);
+            const position = await query.findPosition(product.id as ProductId);
 
             expect(position?.available).toBe(7);
             expect(position?.position).toBe(14);
@@ -159,8 +171,8 @@ describe("PrismaInventoryQuery", () => {
                 reason: "second",
             });
 
-            const page = await query.listMovements(product.id, {
-                page: 1,
+            const page = await query.listMovements(product.id as ProductId, {
+                offset: 0,
                 limit: 10,
             });
 

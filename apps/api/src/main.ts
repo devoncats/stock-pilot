@@ -1,15 +1,20 @@
-import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { configureApp } from "@/app.setup.js";
 import { AppModule } from "./app.module.js";
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    try {
+        process.loadEnvFile("../../.env");
+    } catch {
+        console.warn("No .env file found, relying on environment variables");
+    }
 
-    app.useGlobalPipes(
-        new ValidationPipe({ transform: true, whitelist: true }),
-    );
+    const app = configureApp(await NestFactory.create(AppModule));
 
     await app.listen(process.env.PORT ?? 8080);
 }
 
-bootstrap();
+bootstrap().catch((error: unknown) => {
+    console.error("[bootstrap]: Failed to bootstrap the application", error);
+    process.exit(1);
+});

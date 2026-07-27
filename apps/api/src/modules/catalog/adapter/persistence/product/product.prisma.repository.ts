@@ -1,11 +1,13 @@
 import { Injectable } from "@nestjs/common";
+import type { Page } from "@stock-pilot/shared";
 import { ProductMapper } from "@/modules/catalog/adapter/persistence/product/product.mapper.js";
-import { ProductRepository } from "@/modules/catalog/application/ports/product.repository.js";
+import type {
+    ListProductsQueryParams,
+    ProductRepository,
+} from "@/modules/catalog/application/ports/product.repository.js";
 import { Product } from "@/modules/catalog/domain/product/product.js";
-import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
+import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { Sku } from "@/modules/catalog/domain/sku/sku.js";
-import { Page } from "@/shared/application/page.js";
-import { Pagination } from "@/shared/application/pagination.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 @Injectable()
@@ -26,7 +28,7 @@ export class PrismaProductRepository implements ProductRepository {
         return row ? ProductMapper.toDomain(row) : null;
     }
 
-    async list(params: Pagination): Promise<Page<Product>> {
+    async list(params: ListProductsQueryParams): Promise<Page<Product>> {
         const [rows, total] = await this.prisma.$transaction([
             this.prisma.product.findMany({
                 take: params.limit,
@@ -39,7 +41,12 @@ export class PrismaProductRepository implements ProductRepository {
 
         const products = rows.map(ProductMapper.toDomain);
 
-        return { items: products, total };
+        return {
+            data: products,
+            total,
+            offset: params.offset,
+            limit: params.limit,
+        };
     }
 
     async save(product: Product): Promise<void> {

@@ -7,7 +7,7 @@ demand_history has no negatives, Mondays only, unique (product, week).
 
 import { resetDatabase } from "test/integration/support/reset.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { runSeed, SeedOptions } from "@/seed/seed.js";
+import { runSeed, type SeedOptions } from "@/seed/seed.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
 
 const seedOptions = (overrides: Partial<SeedOptions> = {}): SeedOptions => ({
