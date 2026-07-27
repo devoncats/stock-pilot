@@ -19,3 +19,4 @@ node_modules
 **/.pylint_cache
 infrastructure
 README.md
+apps/api/src/generated
