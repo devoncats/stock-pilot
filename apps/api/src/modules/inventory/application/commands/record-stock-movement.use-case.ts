@@ -13,15 +13,15 @@ import {
     STOCK_MOVEMENT_REPOSITORY,
     type StockMovementRepository,
 } from "@/modules/inventory/application/commands/ports/stock-movement.repository.js";
-import {
-    TRANSACTION_MANAGER,
-    type TransactionManager,
-} from "@/modules/inventory/application/commands/ports/transaction-manager.js";
 import { InventoryItemNotFoundError } from "@/modules/inventory/domain/errors/inventory-item-not-found/inventory-item-not-found.error.js";
 import { MovementReference } from "@/modules/inventory/domain/movement-reference/movement-reference.js";
 import { StockMovement } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 import { stockMovementId } from "@/modules/inventory/domain/stock-movement-id/stock-movement-id.js";
 import { CLOCK, type Clock } from "@/shared/application/ports/clock.js";
+import {
+    TRANSACTION_MANAGER,
+    type TransactionManager,
+} from "@/shared/application/ports/transaction-manager.js";
 
 export type RecordStockMovementInput = {
     productId: string;
