@@ -42,8 +42,17 @@ def test_daily_to_weekly_anchored_monday(result):
 
 
 def test_does_not_use_walmart_week(result):
-    qtys = [qty for _, qty in weeks_for(result, "FOODS_1_001")]
-    assert qtys == [2, 7, 5]
+    """A Saturday opens a Walmart week but sits mid-ISO-week.
+
+    2011-02-05 is a Saturday: it starts wm_yr_wk 11102, yet it belongs to the
+    ISO week anchored on Monday 2011-01-31. For HOBBIES_1_001 that bucket spans
+    both Walmart weeks (d_3..d_9 = 0+3+0+0+5+0+0 = 8). Grouping by wm_yr_wk
+    would split it into 10 and 5 instead, so no bucket would hold 8.
+    """
+    weeks = dict(weeks_for(result, "HOBBIES_1_001"))
+
+    assert weeks["2011-01-31"] == 8
+    assert set(weeks) == {"2011-01-24", "2011-01-31", "2011-02-07"}
 
 
 def test_filters_by_store(result):

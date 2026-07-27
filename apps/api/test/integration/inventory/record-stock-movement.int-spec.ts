@@ -75,7 +75,14 @@ describe("RecordStockMovement (integration)", () => {
         expect(await onHandOf(product.id)).toBe(10);
     });
 
-    it("serialises concurrent adjustments on the same SKU", async () => {
+    // WARNING: this does NOT prove the row lock works. Deleting `FOR UPDATE`
+    // from `findByProductIdForUpdate` leaves it green, so something else is
+    // already serialising the two calls and a lost update never happens here.
+    // F1-01 §266 asked for exactly this check; it fails. Proving the lock needs
+    // an explicit barrier — hold transaction A open after its read, start B,
+    // and assert B blocks — which is its own piece of work. Until then, treat
+    // the lock as unverified by the suite.
+    it("applies two overlapping adjustments without losing either", async () => {
         const product = await createProduct(prisma);
         await createInventoryItem(prisma, product.id, { onHand: 10 });
 
