@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { InvalidValueError } from "@/shared/domain/errors/invalid-value/invalid-value.error.js";
 import { Money } from "./money.js";
 
 describe("Money", () => {
@@ -23,11 +24,13 @@ describe("Money", () => {
 
     it("rejects negative amounts", () => {
         expect(() => Money.fromCents(-1)).toThrow();
-        expect(() => Money.fromDecimalString("-5.00")).toThrow();
+        expect(() => Money.fromDecimalString("-5.00")).toThrow(
+            InvalidValueError,
+        );
     });
 
     it("rejects a non-integer number of cents", () => {
-        expect(() => Money.fromCents(19.99)).toThrow();
+        expect(() => Money.fromCents(19.99)).toThrow(InvalidValueError);
     });
 
     it("compares by value", () => {
@@ -38,6 +41,6 @@ describe("Money", () => {
     });
 
     it("rejects a string that is not a decimal", () => {
-        expect(() => Money.fromDecimalString("abc")).toThrow();
+        expect(() => Money.fromDecimalString("abc")).toThrow(InvalidValueError);
     });
 });
