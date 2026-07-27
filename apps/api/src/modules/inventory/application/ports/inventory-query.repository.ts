@@ -1,39 +1,26 @@
 import type {
     InventoryKpisDto,
     InventoryPositionDto,
-    Paginated,
+    Page,
     StockMovementDto,
 } from "@stock-pilot/shared";
-
-export type ListPositionsSort = "sku" | "onHand" | "value";
-export type SortDirection = "asc" | "desc";
-
-export interface ListPositionsParams {
-    search?: string;
-    page: number;
-    limit: number;
-    sort?: ListPositionsSort;
-    dir?: SortDirection;
-}
-
-export interface ListMovementsParams {
-    page: number;
-    limit: number;
-}
+import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
+import { ListMovementsQueryDto } from "@/modules/inventory/adapter/http/dto/list-movements-query.dto.js";
+import { ListPositionsQueryDto } from "@/modules/inventory/adapter/http/dto/list-positions-query.dto.js";
 
 export interface InventoryQuery {
-    listPositions(
-        params: ListPositionsParams,
-    ): Promise<Paginated<InventoryPositionDto>>;
+    findPosition(productId: ProductId): Promise<InventoryPositionDto | null>;
 
-    findPosition(productId: string): Promise<InventoryPositionDto | null>;
+    listPositions(
+        params: ListPositionsQueryDto,
+    ): Promise<Page<InventoryPositionDto>>;
 
     listMovements(
-        productId: string,
-        params: ListMovementsParams,
-    ): Promise<Paginated<StockMovementDto>>;
+        productId: ProductId,
+        params: ListMovementsQueryDto,
+    ): Promise<Page<StockMovementDto>>;
 
     inventoryKpis(): Promise<InventoryKpisDto>;
 }
 
-export const INVENTORY_QUERY = Symbol("InventoryQuery");
+export const INVENTORY_QUERY_REPOSITORY = Symbol("InventoryQueryRepository");

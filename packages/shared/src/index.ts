@@ -1,8 +1,8 @@
+export { Page } from "./application/page.js";
 export { HealthStatus, isHealthStatus } from "./health.js";
 export {
     InventoryKpisDto,
     InventoryPositionDto,
-    Paginated,
     StockMovementDto,
 } from "./inventory.js";
 export { MovementType } from "./movement-type.js";

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nest build && tsc-alias -p tsconfig.build.json",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "nest start -b swc --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main.js",
     "dev": "nest start --watch",
@@ -36,6 +36,7 @@
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
+    "@swc/cli": "^0.8.1",
     "@swc/core": "^1.15.43",
     "@testcontainers/postgresql": "^12.0.4",
     "@types/express": "^5.0.0",

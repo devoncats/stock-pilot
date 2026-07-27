@@ -2,19 +2,18 @@ import { Injectable } from "@nestjs/common";
 import type {
     InventoryKpisDto,
     InventoryPositionDto,
-    Paginated,
+    Page,
     StockMovementDto,
 } from "@stock-pilot/shared";
 import { Prisma } from "@/generated/prisma/client.js";
 import type { StockMovementModel } from "@/generated/prisma/models.js";
+import { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
+import { ListMovementsQueryDto } from "@/modules/inventory/adapter/http/dto/list-movements-query.dto.js";
+import { ListPositionsQueryDto } from "@/modules/inventory/adapter/http/dto/list-positions-query.dto.js";
 import type { InventoryItemWithProduct } from "@/modules/inventory/adapter/persistence/inventory-position.mapper.js";
 import { InventoryPositionMapper } from "@/modules/inventory/adapter/persistence/inventory-position.mapper.js";
 import { StockMovementMapper } from "@/modules/inventory/adapter/persistence/stock-movement.mapper.js";
-import type {
-    InventoryQuery,
-    ListMovementsParams,
-    ListPositionsParams,
-} from "@/modules/inventory/application/ports/inventory-query.repository.js";
+import type { InventoryQuery } from "@/modules/inventory/application/ports/inventory-query.repository.js";
 import {
     averageCoverageWeeks,
     skusOutOfStock,
@@ -27,7 +26,7 @@ export class PrismaInventoryQuery implements InventoryQuery {
     constructor(private readonly prisma: PrismaService) {}
 
     async findPosition(
-        productId: string,
+        productId: ProductId,
     ): Promise<InventoryPositionDto | null> {
         const row = await this.prisma.inventoryItem.findUnique({
             where: { productId },
@@ -47,10 +46,16 @@ export class PrismaInventoryQuery implements InventoryQuery {
     }
 
     async listPositions(
-        params: ListPositionsParams,
-    ): Promise<Paginated<InventoryPositionDto>> {
-        const { search, page, limit, sort = "sku", dir = "asc" } = params;
-        const offset = (page - 1) * limit;
+        params: ListPositionsQueryDto,
+    ): Promise<Page<InventoryPositionDto>> {
+        const {
+            search,
+            offset = 0,
+            limit = 25,
+            sort = "sku",
+            dir = "asc",
+        } = params;
+
         const where = this.whereFor(search);
         const orderBy = this.orderByFor(sort, dir);
 
@@ -82,15 +87,16 @@ export class PrismaInventoryQuery implements InventoryQuery {
             );
         }
 
+        const page = Math.floor(offset / limit) + 1;
+
         return { data: positions, page, limit, total };
     }
 
     async listMovements(
-        productId: string,
-        params: ListMovementsParams,
-    ): Promise<Paginated<StockMovementDto>> {
-        const { page, limit } = params;
-        const offset = (page - 1) * limit;
+        productId: ProductId,
+        params: ListMovementsQueryDto,
+    ): Promise<Page<StockMovementDto>> {
+        const { offset, limit } = params;
         const where = { productId };
 
         const [rows, total]: [StockMovementModel[], number] =
@@ -103,6 +109,8 @@ export class PrismaInventoryQuery implements InventoryQuery {
                 }),
                 this.prisma.stockMovement.count({ where }),
             ]);
+
+        const page = Math.floor(offset / limit) + 1;
 
         return {
             data: rows.map(StockMovementMapper.toDto),
@@ -151,7 +159,7 @@ export class PrismaInventoryQuery implements InventoryQuery {
     }
 
     private whereFor(
-        search: string | undefined,
+        search: ListPositionsQueryDto["search"],
     ): Prisma.InventoryItemWhereInput {
         if (!search) {
             return {};
@@ -168,8 +176,8 @@ export class PrismaInventoryQuery implements InventoryQuery {
     }
 
     private orderByFor(
-        sort: ListPositionsParams["sort"],
-        dir: "asc" | "desc",
+        sort: ListPositionsQueryDto["sort"] = "sku",
+        dir: ListPositionsQueryDto["dir"] = "asc",
     ): Prisma.InventoryItemOrderByWithRelationInput | undefined {
         if (sort === "onHand") {
             return { onHand: dir };
@@ -179,7 +187,6 @@ export class PrismaInventoryQuery implements InventoryQuery {
             return { product: { sku: dir } };
         }
 
-        // "value" is handled in memory — see the comment in listPositions.
         return undefined;
     }
 

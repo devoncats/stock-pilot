@@ -62,7 +62,7 @@ describe("PrismaProductRepository", () => {
 
         const page = await repository.list({ limit: 2, offset: 0 });
 
-        expect(page.items).toHaveLength(2);
+        expect(page.data).toHaveLength(2);
         expect(page.total).toBe(3);
     });
 
@@ -73,7 +73,7 @@ describe("PrismaProductRepository", () => {
 
         const page = await repository.list({ limit: 2, offset: 2 });
 
-        expect(page.items).toHaveLength(1);
+        expect(page.data).toHaveLength(1);
         expect(page.total).toBe(3);
     });
 
@@ -91,9 +91,9 @@ describe("PrismaProductRepository", () => {
 
         const all = await repository.list({ limit: 10, offset: 0 });
 
-        expect(all.items).toHaveLength(1);
+        expect(all.data).toHaveLength(1);
         expect(
-            all.items[0]?.unitCost.equals(Money.fromDecimalString("99.99")),
+            all.data[0]?.unitCost.equals(Money.fromDecimalString("99.99")),
         ).toBe(true);
     });
 });

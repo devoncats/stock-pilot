@@ -35,36 +35,34 @@ describe("Inventory (e2e)", () => {
         await app.close();
     });
 
-    it("GET /api/v1/inventory returns the {data,page,limit,total} envelope", async () => {
+    it("GET /inventory returns the {data,page,limit,total} envelope", async () => {
         const product = await createProduct(prisma);
         await createInventoryItem(prisma, product.id, { onHand: 5 });
 
-        const response = await request(app.getHttpServer()).get(
-            "/api/v1/inventory",
-        );
+        const response = await request(app.getHttpServer()).get("/inventory");
 
         expect(response.status).toBe(200);
         expect(response.body).toMatchObject({ page: 1, limit: 25, total: 1 });
         expect(response.body.data).toHaveLength(1);
     });
 
-    it("GET /api/v1/inventory?limit=101 returns 400", async () => {
+    it("GET /inventory?limit=101 returns 400", async () => {
         const response = await request(app.getHttpServer()).get(
-            "/api/v1/inventory?limit=101",
+            "/inventory?limit=101",
         );
 
         expect(response.status).toBe(400);
     });
 
-    it("GET /api/v1/inventory/:id returns 404 for an unknown product", async () => {
+    it("GET /inventory/:id returns 404 for an unknown product", async () => {
         const response = await request(app.getHttpServer()).get(
-            "/api/v1/inventory/00000000-0000-7000-8000-000000000000",
+            "/inventory/00000000-0000-7000-8000-000000000000",
         );
 
         expect(response.status).toBe(404);
     });
 
-    it("GET /api/v1/inventory/:id/movements shows the newest adjustment first", async () => {
+    it("GET /inventory/:id/movements shows the newest adjustment first", async () => {
         const product = await createProduct(prisma);
         await createInventoryItem(prisma, product.id);
         await createStockMovement(prisma, product.id, { reason: "older" });
@@ -72,18 +70,18 @@ describe("Inventory (e2e)", () => {
         await createStockMovement(prisma, product.id, { reason: "newest" });
 
         const response = await request(app.getHttpServer()).get(
-            `/api/v1/inventory/${product.id}/movements`,
+            `/inventory/${product.id}/movements`,
         );
 
         expect(response.status).toBe(200);
         expect(response.body.data[0]).toMatchObject({ reason: "newest" });
     });
 
-    it("GET /api/v1/kpis returns 200 with all four fields and integer cents", async () => {
+    it("GET /kpis returns 200 with all four fields and integer cents", async () => {
         const product = await createProduct(prisma);
         await createInventoryItem(prisma, product.id, { onHand: 3 });
 
-        const response = await request(app.getHttpServer()).get("/api/v1/kpis");
+        const response = await request(app.getHttpServer()).get("/kpis");
 
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty("totalSkus");

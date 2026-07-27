@@ -8,33 +8,34 @@ import {
 } from "@nestjs/common";
 import type {
     InventoryPositionDto,
-    Paginated,
+    Page,
     StockMovementDto,
 } from "@stock-pilot/shared";
+import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { ListMovementsQueryDto } from "@/modules/inventory/adapter/http/dto/list-movements-query.dto.js";
 import { ListPositionsQueryDto } from "@/modules/inventory/adapter/http/dto/list-positions-query.dto.js";
 import {
-    INVENTORY_QUERY,
-    InventoryQuery,
+    INVENTORY_QUERY_REPOSITORY,
+    type InventoryQuery,
 } from "@/modules/inventory/application/ports/inventory-query.repository.js";
 
-@Controller("api/v1/inventory")
+@Controller("inventory")
 export class InventoryController {
     constructor(
-        @Inject(INVENTORY_QUERY)
+        @Inject(INVENTORY_QUERY_REPOSITORY)
         private readonly inventoryQuery: InventoryQuery,
     ) {}
 
     @Get()
-    listPositions(
+    async listPositions(
         @Query() query: ListPositionsQueryDto,
-    ): Promise<Paginated<InventoryPositionDto>> {
+    ): Promise<Page<InventoryPositionDto>> {
         return this.inventoryQuery.listPositions(query);
     }
 
     @Get(":productId")
     async findPosition(
-        @Param("productId") productId: string,
+        @Param("productId") productId: ProductId,
     ): Promise<InventoryPositionDto> {
         const position = await this.inventoryQuery.findPosition(productId);
 
@@ -49,9 +50,9 @@ export class InventoryController {
 
     @Get(":productId/movements")
     async listMovements(
-        @Param("productId") productId: string,
+        @Param("productId") productId: ProductId,
         @Query() query: ListMovementsQueryDto,
-    ): Promise<Paginated<StockMovementDto>> {
+    ): Promise<Page<StockMovementDto>> {
         const position = await this.inventoryQuery.findPosition(productId);
 
         if (!position) {

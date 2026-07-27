@@ -39,10 +39,3 @@ export interface InventoryKpisDto {
     averageCoverageWeeks: number | null;
     skusOutOfStock: number;
 }
-
-export interface Paginated<T> {
-    data: T[];
-    page: number;
-    limit: number;
-    total: number;
-}
