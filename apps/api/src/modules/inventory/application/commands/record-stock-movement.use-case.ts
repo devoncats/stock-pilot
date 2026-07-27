@@ -2,10 +2,6 @@ import { Inject, Injectable } from "@nestjs/common";
 import type { MovementType, ReferenceType } from "@stock-pilot/shared";
 import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import {
-    ID_GENERATOR,
-    type IdGenerator,
-} from "@/modules/inventory/application/commands/ports/id-generator.js";
-import {
     INVENTORY_ITEM_REPOSITORY,
     type InventoryItemRepository,
 } from "@/modules/inventory/application/commands/ports/inventory-item.repository.js";
@@ -18,6 +14,10 @@ import { MovementReference } from "@/modules/inventory/domain/movement-reference
 import { StockMovement } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
 import { stockMovementId } from "@/modules/inventory/domain/stock-movement-id/stock-movement-id.js";
 import { CLOCK, type Clock } from "@/shared/application/ports/clock.js";
+import {
+    ID_GENERATOR,
+    type IdGenerator,
+} from "@/shared/application/ports/id-generator.js";
 import {
     TRANSACTION_MANAGER,
     type TransactionManager,

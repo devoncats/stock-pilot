@@ -3,8 +3,8 @@ import { resetDatabase } from "test/integration/support/reset.js";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import type { Prisma } from "@/generated/prisma/browser.js";
 import { PrismaService } from "@/shared/prisma/prisma.service.js";
-import { PrismaTransactionManager } from "@/shared/prisma/prisma-transaction.manager.js";
-import { TransactionContext } from "@/shared/prisma/transaction-context.js";
+import { PrismaTransactionManager } from "@/shared/prisma-transaction.manager.js";
+import { TransactionContext } from "@/shared/transaction-context.js";
 
 const prisma = new PrismaService();
 const context = new TransactionContext(prisma);

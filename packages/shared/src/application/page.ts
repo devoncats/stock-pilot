@@ -1,6 +1,11 @@
 export interface Page<T> {
     data: T[];
-    page: number;
+    offset: number;
     limit: number;
     total: number;
+}
+
+export interface PageParams {
+    offset: number;
+    limit: number;
 }

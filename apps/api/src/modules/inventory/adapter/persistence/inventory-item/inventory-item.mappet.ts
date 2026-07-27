@@ -3,12 +3,11 @@ import type { InventoryItemModel } from "@/generated/prisma/models.js";
 import { productId } from "@/modules/catalog/domain/product-id/product-id.js";
 import { InventoryItem } from "@/modules/inventory/domain/inventory-item/inventory-item.js";
 
-export const IventoryItemMapper = {
+export const InventoryItemMapper = {
     toPersistence(
         inventoryItem: InventoryItem,
-    ): Prisma.InventoryItemUncheckedCreateInput {
+    ): Omit<Prisma.InventoryItemUncheckedCreateInput, "productId"> {
         return {
-            productId: inventoryItem.productId,
             onHand: inventoryItem.onHand,
             reserved: inventoryItem.reserved,
             onOrder: inventoryItem.onOrder,

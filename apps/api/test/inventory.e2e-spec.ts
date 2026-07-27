@@ -33,7 +33,7 @@ describe("Inventory (e2e)", () => {
         await app?.close();
     });
 
-    it("GET /api/v1/inventory returns the {data,page,limit,total} envelope", async () => {
+    it("GET /api/v1/inventory returns the {data,offset,limit,total} envelope", async () => {
         const product = await createProduct(prisma);
         await createInventoryItem(prisma, product.id, { onHand: 5 });
 
@@ -42,7 +42,7 @@ describe("Inventory (e2e)", () => {
         );
 
         expect(response.status).toBe(200);
-        expect(response.body).toMatchObject({ page: 1, limit: 25, total: 1 });
+        expect(response.body).toMatchObject({ offset: 0, limit: 25, total: 1 });
         expect(response.body.data).toHaveLength(1);
     });
 

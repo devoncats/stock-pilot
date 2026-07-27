@@ -1,4 +1,4 @@
-export type { Page } from "./application/page.js";
+export type { Page, PageParams } from "./application/page.js";
 export { type HealthStatus, isHealthStatus } from "./health.js";
 export type {
     InventoryKpisDto,

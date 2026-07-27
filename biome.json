@@ -19,8 +19,7 @@
                 "noExplicitAny": "error"
             },
             "style": {
-                "useImportType": "error",
-                "useExportType": "error"
+                "useImportType": "off"
             }
         }
     },

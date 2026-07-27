@@ -8,12 +8,14 @@ import type {
 import { Prisma } from "@/generated/prisma/client.js";
 import type { StockMovementModel } from "@/generated/prisma/models.js";
 import { type ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
-import { ListMovementsQueryDto } from "@/modules/inventory/adapter/http/dto/list-movements-query.dto.js";
-import { ListPositionsQueryDto } from "@/modules/inventory/adapter/http/dto/list-positions-query.dto.js";
 import type { InventoryItemWithProduct } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-position.mapper.js";
 import { InventoryPositionMapper } from "@/modules/inventory/adapter/persistence/inventory-query/inventory-position.mapper.js";
 import { StockMovementViewMapper } from "@/modules/inventory/adapter/persistence/stock-movement/stock-movement-view.mapper.js";
-import type { InventoryQuery } from "@/modules/inventory/application/queries/ports/inventory-query.repository.js";
+import type {
+    InventoryQuery,
+    ListMovementsQueryParams,
+    ListPositionsQueryParams,
+} from "@/modules/inventory/application/queries/ports/inventory-query.repository.js";
 import {
     averageCoverageWeeks,
     skusOutOfStock,
@@ -50,7 +52,7 @@ export class PrismaInventoryQuery implements InventoryQuery {
     }
 
     async listPositions(
-        params: ListPositionsQueryDto,
+        params: ListPositionsQueryParams,
     ): Promise<Page<InventoryPositionDto>> {
         const {
             search,
@@ -91,14 +93,12 @@ export class PrismaInventoryQuery implements InventoryQuery {
             );
         }
 
-        const page = Math.floor(offset / limit) + 1;
-
-        return { data: positions, page, limit, total };
+        return { data: positions, offset, limit, total };
     }
 
     async listMovements(
         productId: ProductId,
-        params: ListMovementsQueryDto,
+        params: ListMovementsQueryParams,
     ): Promise<Page<StockMovementDto>> {
         const { offset, limit } = params;
         const where = { productId };
@@ -114,11 +114,9 @@ export class PrismaInventoryQuery implements InventoryQuery {
                 this.prisma.stockMovement.count({ where }),
             ]);
 
-        const page = Math.floor(offset / limit) + 1;
-
         return {
             data: rows.map(StockMovementViewMapper.toDto),
-            page,
+            offset,
             limit,
             total,
         };
@@ -163,7 +161,7 @@ export class PrismaInventoryQuery implements InventoryQuery {
     }
 
     private whereFor(
-        search: ListPositionsQueryDto["search"],
+        search: ListPositionsQueryParams["search"],
     ): Prisma.InventoryItemWhereInput {
         if (!search) {
             return {};
@@ -180,8 +178,8 @@ export class PrismaInventoryQuery implements InventoryQuery {
     }
 
     private orderByFor(
-        sort: ListPositionsQueryDto["sort"] = "sku",
-        dir: ListPositionsQueryDto["dir"] = "asc",
+        sort: ListPositionsQueryParams["sort"] = "sku",
+        dir: ListPositionsQueryParams["dir"] = "asc",
     ): Prisma.InventoryItemOrderByWithRelationInput | undefined {
         if (sort === "onHand") {
             return { onHand: dir };
@@ -196,7 +194,7 @@ export class PrismaInventoryQuery implements InventoryQuery {
 
     private sortByValue(
         positions: InventoryPositionDto[],
-        dir: "asc" | "desc",
+        dir: ListPositionsQueryParams["dir"] = "asc",
     ): InventoryPositionDto[] {
         const sorted = [...positions].sort(
             (a, b) => a.valueCents - b.valueCents,

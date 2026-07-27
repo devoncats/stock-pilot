@@ -13,7 +13,7 @@ export const StockMovementMapper = {
             productId: stockMovement.productId,
             type: stockMovement.type,
             signedQty: stockMovement.qty,
-            week: stockMovement.week.toString(),
+            week: stockMovement.week.value,
             referenceType: stockMovement.reference.type,
             referenceId: stockMovement.reference.id,
             reason: stockMovement.reason,

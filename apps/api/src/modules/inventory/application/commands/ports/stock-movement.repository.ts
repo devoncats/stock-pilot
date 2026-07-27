@@ -1,13 +1,14 @@
-import type { Page } from "@stock-pilot/shared";
+import type { Page, PageParams } from "@stock-pilot/shared";
 import type { ProductId } from "@/modules/catalog/domain/product-id/product-id.js";
-import { ListByProductQueryDto } from "@/modules/inventory/adapter/http/dto/list-by-product-query.dto.js";
 import type { StockMovement } from "@/modules/inventory/domain/stock-movement/stock-movement.js";
+
+export type ListByProductQueryParams = PageParams;
 
 export interface StockMovementRepository {
     append(movement: StockMovement): Promise<void>;
     listByProduct(
         productId: ProductId,
-        params: ListByProductQueryDto,
+        params: ListByProductQueryParams,
     ): Promise<Page<StockMovement>>;
     sumQtyByProduct(productId: ProductId): Promise<number>;
 }

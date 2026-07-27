@@ -1,11 +1,11 @@
 import { Type } from "class-transformer";
 import { IsIn, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
-
-const SORT_VALUES = ["sku", "onHand", "value"] as const;
-export type SortValue = (typeof SORT_VALUES)[number];
-
-const DIR_VALUES = ["asc", "desc"] as const;
-export type DirValue = (typeof DIR_VALUES)[number];
+import {
+    DIR_VALUES,
+    type DirValue,
+    SORT_VALUES,
+    type SortValue,
+} from "@/modules/inventory/application/queries/ports/inventory-query.repository.js";
 
 export class ListPositionsQueryDto {
     @IsOptional()

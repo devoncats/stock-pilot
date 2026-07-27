@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { TransactionManager } from "@/shared/application/ports/transaction-manager.js";
-import type { PrismaService } from "@/shared/prisma/prisma.service.js";
-import type { TransactionContext } from "@/shared/prisma/transaction-context.js";
+import { PrismaService } from "@/shared/prisma/prisma.service.js";
+import { TransactionContext } from "@/shared/transaction-context.js";
 
 const MAX_WAIT_MS = 5_000;
 const TIMEOUT_MS = 15_000;

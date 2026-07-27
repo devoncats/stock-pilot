@@ -37,7 +37,7 @@ describe("PrismaInventoryQuery", () => {
 
             expect(page.data).toHaveLength(2);
             expect(page.total).toBe(3);
-            expect(page.page).toBe(1);
+            expect(page.offset).toBe(1);
             expect(page.limit).toBe(2);
         });
 
