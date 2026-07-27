@@ -16,7 +16,7 @@ import { ListPositionsQueryDto } from "@/modules/inventory/adapter/http/dto/list
 import {
     INVENTORY_QUERY,
     InventoryQuery,
-} from "@/modules/inventory/application/ports/inventory-query.js";
+} from "@/modules/inventory/application/ports/inventory-query.repository.js";
 
 @Controller("api/v1/inventory")
 export class InventoryController {

@@ -14,7 +14,7 @@ import type {
     InventoryQuery,
     ListMovementsParams,
     ListPositionsParams,
-} from "@/modules/inventory/application/ports/inventory-query.js";
+} from "@/modules/inventory/application/ports/inventory-query.repository.js";
 import {
     averageCoverageWeeks,
     skusOutOfStock,

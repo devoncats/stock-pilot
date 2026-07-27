@@ -3,7 +3,7 @@ import { IsIn, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
 import type {
     ListPositionsSort,
     SortDirection,
-} from "@/modules/inventory/application/ports/inventory-query.js";
+} from "@/modules/inventory/application/ports/inventory-query.repository.js";
 
 const SORT_VALUES: ListPositionsSort[] = ["sku", "onHand", "value"];
 const DIR_VALUES: SortDirection[] = ["asc", "desc"];

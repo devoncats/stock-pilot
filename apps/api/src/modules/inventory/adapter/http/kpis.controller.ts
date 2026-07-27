@@ -3,7 +3,7 @@ import type { InventoryKpisDto } from "@stock-pilot/shared";
 import {
     INVENTORY_QUERY,
     InventoryQuery,
-} from "@/modules/inventory/application/ports/inventory-query.js";
+} from "@/modules/inventory/application/ports/inventory-query.repository.js";
 
 @Controller("api/v1/kpis")
 export class KpisController {
