@@ -59,6 +59,7 @@ services:
         restart: unless-stopped
         environment:
             PORT: 3000
+            API_URL: http://api:8080
         ports:
             - "${WEB_PORT:-3000}:3000"
         depends_on:

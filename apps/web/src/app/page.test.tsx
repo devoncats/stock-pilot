@@ -1,14 +1,15 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const { redirectMock } = vi.hoisted(() => ({ redirectMock: vi.fn() }));
+
+vi.mock("next/navigation", () => ({ redirect: redirectMock }));
 
 import Home from "@/app/page";
 
-describe("Home page", () => {
-    it("renders the application name", () => {
-        render(<Home />);
+describe("Home", () => {
+    it("redirects to the inventory dashboard", () => {
+        Home();
 
-        expect(
-            screen.getByRole("heading", { name: /stockpilot/i }),
-        ).toBeInTheDocument();
+        expect(redirectMock).toHaveBeenCalledWith("/inventory");
     });
 });
