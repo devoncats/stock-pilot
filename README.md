@@ -89,6 +89,31 @@ pnpm smoke:apps             # the above, plus api /health and the web root
 > **Never run `docker compose down -v`.** The `-v` removes the `pgdata` volume,
 > which is the database.
 
+## Dashboard
+
+`apps/web` is a read-only view over the inventory read API. Open
+<http://localhost:3000> and it redirects to `/inventory`.
+
+| Route | Shows |
+| --- | --- |
+| `/inventory` | KPI cards, and a searchable, sortable, paginated table of positions |
+| `/inventory/<productId>` | One SKU's full position and its movement history, newest first |
+
+Search, sorting and pagination all live in the URL, so any view is a link
+someone else can open and get the same result. Sorting is limited to the three
+columns the API accepts (`sku`, `onHand`, `value`); anything else in the URL
+falls back to a default rather than reaching the API, which validates these
+strictly and would answer 400.
+
+Pages are rendered on the server and fetched with `cache: "no-store"`. Stock
+changes on every movement, so a cached page would show a number that is already
+wrong — record an adjustment and refresh, and the figure moves.
+
+Coverage is reported as the API sends it: `null` means there is no demand
+history to compute it from, and renders as `—`, never `0`. The KPI panel names
+the week demand data runs through, so a column of dashes is explainable rather
+than alarming.
+
 ## Scripts
 
 | Script | What it does |
@@ -317,6 +342,13 @@ are copied explicitly, since the minimal server does not include them.
 `NEXT_PUBLIC_API_URL` is a **build argument**, not a runtime variable. Next inlines
 `NEXT_PUBLIC_*` into the browser bundle at compile time, so setting it in
 `environment:` would have no effect.
+
+`API_URL` is the opposite: server-only and read at runtime, so it belongs in
+`environment:`. Server Components fetch from the Next server, not the browser,
+and inside Compose `localhost` is the `web` container itself — the API is at
+`http://api:8080`. On the host both variables point at the same place. Next
+reads `.env` from the app directory, so `apps/web/next.config.ts` loads the
+repo-root file explicitly, mirroring `apps/api/src/main.ts`.
 
 Every Compose invocation passes `--env-file .env`. The Compose project directory
 is `infrastructure/`, where no `.env` exists, so without the flag every `${VAR}`
